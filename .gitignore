@@ -1,0 +1,55 @@
+# IDE 설정 파일
+.idea/
+.vscode/
+
+# 환경 변수
+.envrc.private
+
+# OS에서 생성되는 불필요한 파일들
+.DS_Store
+Thumbs.db
+
+# ------------- Back (Gradle/Java) -------------
+# Gradle 빌드 산출물 및 캐시 디렉토리
+/back/build/
+/back/.gradle/
+
+# Gradle Wrapper (실행 스크립트는 포함하지만, 빌드 산출물은 제외)
+/back/gradlew
+/back/gradlew.bat
+
+# Eclipse/IntelliJ 등 IDE 관련 파일 (필요 시 back 디렉토리 내부에 IDE 설정 파일도 추가)
+/back/*.iml
+/back/.idea/
+
+# Maven 빌드 산출물 (혹시 사용 시)
+/back/target/
+
+# ------------- Front (Node.js/Frontend) -------------
+# Node.js 모듈 디렉토리
+/front/node_modules/
+
+# 프론트엔드 빌드 산출물 (빌드 도구(vite 등) 설정에 따라 변경)
+/front/dist/
+# 혹은 빌드 산출물이 다른 디렉토리라면 해당 디렉토리를 추가
+# /front/build/
+
+# Vite, Next.js, Nuxt 등 프레임워크 캐시
+/front/.vite
+/front/.next
+/front/.nuxt
+/front/.cache
+
+# 환경변수 파일 (필요 시 버전관리에 포함)
+/front/.env
+/back/.env
+
+# 로그 파일
+*.log
+
+# Optional: 기타 불필요 파일
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.envrc.private

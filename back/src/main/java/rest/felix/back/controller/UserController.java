@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rest.felix.back.dto.internal.SignupDTO;
 import rest.felix.back.dto.internal.UserDTO;
 import rest.felix.back.dto.request.SignInRequestDTO;
@@ -20,6 +17,7 @@ import rest.felix.back.service.PasswordService;
 import rest.felix.back.service.UserService;
 
 import java.time.Duration;
+import java.util.Optional;
 
 
 @RestController
@@ -89,4 +87,35 @@ public class UserController {
                 .header(HttpHeaders.SET_COOKIE, authCookie.toString())
                 .body(new UserResponseDTO(userDTO.getId(), userDTO.getUsername(), userDTO.getNickname()));
     }
+
+    @DeleteMapping("/token")
+    public ResponseEntity logOutUser() {
+        ResponseCookie emptyCookie = ResponseCookie
+                .from("accessToken", "")
+                .path("/")
+                .httpOnly(true)
+                .secure(false)
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity
+                .status(204)
+                .header(HttpHeaders.SET_COOKIE, emptyCookie.toString())
+                .build();
+
+
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getCurrentUserInfo(@CookieValue(name="accessToken", required = false) String accessToken) {
+
+        return ResponseEntity.ok().body(Optional.ofNullable(accessToken)
+                .map(jwtTokenProvider::getUsernameFromToken)
+                .flatMap(userService::getByUsername)
+                .map(userDTO -> new UserResponseDTO(userDTO.getId(), userDTO.getUsername(), userDTO.getNickname()))
+                .orElseThrow(NoMatchingUserException::new));
+    }
+
+
 }

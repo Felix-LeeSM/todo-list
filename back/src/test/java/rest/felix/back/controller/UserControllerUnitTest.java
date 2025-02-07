@@ -1,5 +1,6 @@
 package rest.felix.back.controller;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,9 +14,10 @@ import rest.felix.back.dto.request.SignupRequestDTO;
 import rest.felix.back.dto.response.UserResponseDTO;
 import rest.felix.back.entity.User;
 import rest.felix.back.exception.throwable.badrequest.ConfirmPasswordMismatchException;
-import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 import rest.felix.back.exception.throwable.badrequest.UsernameTakenException;
+import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 import rest.felix.back.repository.UserRepository;
+import rest.felix.back.security.JwtTokenProvider;
 
 @SpringBootTest
 @Transactional
@@ -26,6 +28,10 @@ class UserControllerUnitTest {
     private UserController userController;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EntityManager em;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     void signUp_HappyPath() {
@@ -178,4 +184,68 @@ class UserControllerUnitTest {
         });
 
     }
+
+    @Test
+    void logOutUser_HappyPath() {
+        // Given
+
+        // When
+
+        ResponseEntity response = userController.logOutUser();
+
+        // Then
+
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void currentUserInfo_HappyPath() {
+        // Given
+
+        User user = new User();
+        user.setHashedPassword("hashedPassword");
+        user.setUsername("username");
+        user.setNickname("nickname");
+        userRepository.save(user);
+        em.flush();
+
+        String token = jwtTokenProvider.generateToken("username");
+
+        // When
+
+        ResponseEntity<UserResponseDTO> response = userController.getCurrentUserInfo(token);
+
+        // Then
+
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        UserResponseDTO responseDTO = response.getBody();
+
+        Assertions.assertEquals("username", responseDTO.username());
+        Assertions.assertEquals("nickname", responseDTO.nickname());
+        Assertions.assertEquals("username", responseDTO.username());
+        Assertions.assertEquals(user.getId(), responseDTO.id());
+
+
+    }
+
+    @Test
+    void currentUserInfo_Failure_NoToken() {
+        // Given
+
+        String token = null;
+
+        // When
+
+
+        // Then
+
+        Assertions.assertThrows(NoMatchingUserException.class, () -> {
+            userController.getCurrentUserInfo(token);
+        });
+
+
+    }
+
 }

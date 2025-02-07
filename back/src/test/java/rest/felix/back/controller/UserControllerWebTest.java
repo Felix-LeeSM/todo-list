@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,7 +19,7 @@ import rest.felix.back.dto.request.SignupRequestDTO;
 import rest.felix.back.repository.UserRepository;
 import rest.felix.back.security.JwtTokenProvider;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -321,6 +322,113 @@ public class UserControllerWebTest {
 
         result.andExpect(status().isUnauthorized());
         result.andExpect(jsonPath("$.message").value("There is no user with given conditions."));
+    }
+
+    @Test
+    void logOutUser_HappyPath() throws Exception {
+        // Given
+
+        SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username123", "nickname", "password123412341234", "password123412341234");
+
+        mvc.perform(
+                post("/api/v1/user")
+                        .content(objectMapper.writeValueAsString(signupRequestDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        Cookie cookie = new Cookie("accessToken", jwtTokenProvider.generateToken("username123"));
+        String path = "/api/v1/user/token";
+
+        // When
+
+        ResultActions result = mvc.perform(
+                delete(path)
+                        .cookie(cookie)
+        );
+
+        // Then
+
+        result.andExpect(cookie().exists("accessToken"));
+        result.andExpect(mvcResult -> {
+                    Cookie accessTokenCookie = mvcResult.getResponse().getCookie("accessToken");
+                    Assertions.assertNotNull(accessTokenCookie);
+                    Assertions.assertEquals(0, accessTokenCookie.getMaxAge());
+                }
+        );
+    }
+
+    @Test
+    void logOutUser_Failure_NotSignedIn() throws Exception {
+        // Given
+
+        String path = "/api/v1/user/token";
+
+        // When
+
+        ResultActions result = mvc.perform(
+                delete(path)
+        );
+
+        // Then
+
+        result.andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    void currentUserInfo_HappyPath() throws Exception {
+        // Given
+
+        SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username123", "nickname", "password123412341234", "password123412341234");
+
+        mvc.perform(
+                post("/api/v1/user")
+                        .content(objectMapper.writeValueAsString(signupRequestDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        Cookie cookie = new Cookie("accessToken", jwtTokenProvider.generateToken("username123"));
+
+        String path = "/api/v1/user/me";
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .cookie(cookie)
+        );
+
+        // Then
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.id").isNotEmpty());
+        result.andExpect(jsonPath("$.username").value("username123"));
+        result.andExpect(jsonPath("$.nickname").value("nickname"));
+
+    }
+
+    @Test
+    void currentUserInfo_Failure_NotSingedIn() throws Exception {
+        // Given
+
+        String path = "/api/v1/user/me";
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+
+        result.andExpect(status().isUnauthorized());
+
     }
 
 }

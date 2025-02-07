@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import rest.felix.back.dto.internal.SignupDTO;
 import rest.felix.back.dto.internal.UserDTO;
 import rest.felix.back.dto.request.SignupRequestDTO;
@@ -15,8 +16,11 @@ import rest.felix.back.exception.throwable.badrequest.ConfirmPasswordMismatchExc
 import rest.felix.back.exception.throwable.badrequest.UsernameTakenException;
 import rest.felix.back.repository.UserRepository;
 
+import java.util.Optional;
+
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class UserServiceTest {
 
     @Autowired
@@ -123,4 +127,42 @@ class UserServiceTest {
 
 
     }
+
+    @Test
+    void getByUsername_HappyPath() {
+        // Given
+
+        User user = new User();
+        user.setUsername("username");
+        user.setNickname("nickname");
+        user.setHashedPassword("password");
+        userRepository.save(user);
+        em.flush();
+
+        // When
+
+        UserDTO userDTO = userService.getByUsername("username").get();
+
+        // Then
+
+        Assertions.assertEquals(user.getId(), userDTO.getId());
+        Assertions.assertEquals(user.getUsername(), userDTO.getUsername());
+        Assertions.assertEquals(user.getNickname(), userDTO.getNickname());
+        Assertions.assertEquals(user.getHashedPassword(), userDTO.getHashedPassword());
+    }
+
+    @Test
+    void getByUsername_Failure_NoSuchUser() {
+        // Given
+
+
+        // When
+
+        Optional<UserDTO> userDTO = userService.getByUsername("username");
+
+        // Then
+
+        Assertions.assertTrue(userDTO.isEmpty());
+    }
+
 }

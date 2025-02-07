@@ -22,3 +22,8 @@ spring:
   data:
     jdbc:
       dialect: postgresql
+
+jwt:
+  access_token:
+    secret_key: ${JWT_SECRET_KEY}
+    ttl: ${JWT_ACCESS_TOKEN_TTL_MS:86400000}

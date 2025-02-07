@@ -1,23 +1,25 @@
 package rest.felix.back.controller;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+import rest.felix.back.dto.request.SignInRequestDTO;
 import rest.felix.back.dto.request.SignupRequestDTO;
-import rest.felix.back.dto.response.SignupResponseDTO;
+import rest.felix.back.dto.response.UserResponseDTO;
 import rest.felix.back.entity.User;
 import rest.felix.back.exception.throwable.badrequest.ConfirmPasswordMismatchException;
+import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 import rest.felix.back.exception.throwable.badrequest.UsernameTakenException;
 import rest.felix.back.repository.UserRepository;
 
-import java.util.Optional;
-
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class UserControllerUnitTest {
 
     @Autowired
@@ -37,17 +39,17 @@ class UserControllerUnitTest {
 
         // When
 
-        ResponseEntity<SignupResponseDTO> response = userController.signUp(signupRequestDTO);
+        ResponseEntity<UserResponseDTO> response = userController.signUp(signupRequestDTO);
 
         // Then
 
-        SignupResponseDTO signupResponseDTO = response.getBody();
+        UserResponseDTO signupResponseDTO = response.getBody();
 
-        Assertions.assertNotNull(signupResponseDTO.getId());
-        Assertions.assertEquals("username", signupResponseDTO.getUsername());
-        Assertions.assertEquals("nickname", signupResponseDTO.getNickname());
+        Assertions.assertNotNull(signupResponseDTO.id());
+        Assertions.assertEquals("username", signupResponseDTO.username());
+        Assertions.assertEquals("nickname", signupResponseDTO.nickname());
 
-        User user = userRepository.getById(signupResponseDTO.getId()).get();
+        User user = userRepository.getById(signupResponseDTO.id()).get();
         Assertions.assertEquals("username", user.getUsername());
         Assertions.assertEquals("nickname", user.getNickname());
 
@@ -100,5 +102,80 @@ class UserControllerUnitTest {
         });
     }
 
+    @Test
+    void createAccessToken_HappyPath() {
+        // Given
 
+        SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
+                "username",
+                "nickname",
+                "password",
+                "password");
+
+        UserResponseDTO user = userController.signUp(signupRequestDTO).getBody();
+
+        SignInRequestDTO signInRequestDTO = new SignInRequestDTO("username", "password");
+
+        // When
+
+        ResponseEntity<UserResponseDTO> response = userController.createAccessToken(signInRequestDTO);
+
+        // Then
+
+        UserResponseDTO userResponseDTO = response.getBody();
+
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        Assertions.assertEquals(user.id(), userResponseDTO.id());
+        Assertions.assertEquals(user.username(), userResponseDTO.username());
+        Assertions.assertEquals(user.nickname(), userResponseDTO.nickname());
+
+    }
+
+    @Test
+    void createAccessToken_Failure_NoSuchUsername() {
+        // Given
+
+        SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
+                "username",
+                "nickname",
+                "password",
+                "password");
+
+        UserResponseDTO user = userController.signUp(signupRequestDTO).getBody();
+
+        // When
+
+        SignInRequestDTO signInRequestDTO = new SignInRequestDTO("wrong_username", "password");
+
+        // Then
+
+        Assertions.assertThrows(NoMatchingUserException.class, () -> {
+            userController.createAccessToken(signInRequestDTO);
+        });
+
+    }
+
+    @Test
+    void createAccessToken_Failure_WrongPassword() {
+        // Given
+
+        SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
+                "username",
+                "nickname",
+                "password",
+                "password");
+
+        UserResponseDTO user = userController.signUp(signupRequestDTO).getBody();
+
+        // When
+
+        SignInRequestDTO signInRequestDTO = new SignInRequestDTO("username", "wrong_password");
+
+        // Then
+
+        Assertions.assertThrows(NoMatchingUserException.class, () -> {
+            userController.createAccessToken(signInRequestDTO);
+        });
+
+    }
 }

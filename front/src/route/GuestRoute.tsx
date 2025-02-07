@@ -1,0 +1,13 @@
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { AuthContext } from "../context/auth/AuthContext";
+
+export function GuestRoute({ children }: { children: JSX.Element }) {
+  const { user } = useContext(AuthContext);
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}

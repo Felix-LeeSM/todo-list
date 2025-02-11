@@ -20,7 +20,6 @@ public class UserRepository {
     @Autowired
     public UserRepository(EntityManager entityManager) {
         this.em = entityManager;
-
     }
 
     public User createUser(SignupDTO signupDTO) throws UsernameTakenException {

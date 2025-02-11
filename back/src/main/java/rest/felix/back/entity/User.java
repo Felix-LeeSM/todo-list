@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,11 +32,21 @@ public class User {
     @Column(nullable = false, length = 50)
     private String nickname;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserGroup> userGroups = new ArrayList<>();
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Todo> todos = new ArrayList<>();
+
     @CreationTimestamp
     private OffsetDateTime createdAt;
 
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
+    public void addUserGroup(UserGroup userGroup) {
+        this.userGroups.add(userGroup);
+        userGroup.setUser(this);
+    }
 
 }

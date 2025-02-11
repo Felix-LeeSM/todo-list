@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import axios from "axios";
-import { User } from "../../type/User.interface";
+import { UserInterface } from "../../type/User.interface";
 
 export function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<UserInterface>();
 
-  const handleSignIn = (user: User) => {
+  const handleSignIn = (user: UserInterface) => {
     setUser(user);
   };
 
@@ -22,7 +22,7 @@ export function AuthProvider({
 
   useEffect(() => {
     axios
-      .get<User>("/api/v1/user/me")
+      .get<UserInterface>("/api/v1/user/me")
       .then((res) => setUser(res.data))
       .catch(() => {});
   }, []);

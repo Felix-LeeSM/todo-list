@@ -1,9 +1,9 @@
 import { createContext } from "react";
-import { User } from "../../type/User.interface";
+import { UserInterface } from "../../type/User.interface";
 
 export interface AuthContextType {
-  user?: User;
-  handleSignIn: (user: User) => void;
+  user?: UserInterface;
+  handleSignIn: (user: UserInterface) => void;
   handleLogOut: () => void;
 }
 

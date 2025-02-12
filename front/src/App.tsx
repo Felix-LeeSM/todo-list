@@ -4,8 +4,9 @@ import { SignIn } from "./page/SignIn";
 import { SignUp } from "./page/SignUp";
 import { UserRoute } from "./route/UserRoute";
 import { GuestRoute } from "./route/GuestRoute";
-import { Dahsboard } from "./page/Dashboard";
+import { Group } from "./page/Group";
 import { Home } from "./page/Home";
+import { Task } from "./page/Task";
 
 function App() {
   return (
@@ -15,8 +16,12 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />}></Route>
             <Route
-              path="/dashboard"
-              element={<UserRoute children={<Dahsboard />} />}
+              path="/group"
+              element={<UserRoute children={<Group />} />}
+            ></Route>
+            <Route
+              path="/group/:groupId"
+              element={<UserRoute children={<Task />} />}
             ></Route>
             <Route
               path="/signin"

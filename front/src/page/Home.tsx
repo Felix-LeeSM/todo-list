@@ -1,7 +1,10 @@
 import { ArrowRight, Calendar, CheckCircle, Clock } from "lucide-react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/auth/AuthContext";
 
 export function Home() {
+  const { user } = useContext(AuthContext);
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
       <div className="container mx-auto px-4 py-16">
@@ -11,15 +14,18 @@ export function Home() {
             Manage your tasks and schedule with ease and efficiency
           </p>
           <div className="space-x-4">
+            {user ? null : (
+              <Link
+                to="/signin"
+                className="bg-white text-indigo-600 hover:bg-indigo-100 font-bold py-3 px-6 rounded-full inline-flex items-center transition duration-300"
+              >
+                SignIn
+                <ArrowRight className="ml-2" />
+              </Link>
+            )}
+
             <Link
-              to="/signin"
-              className="bg-white text-indigo-600 hover:bg-indigo-100 font-bold py-3 px-6 rounded-full inline-flex items-center transition duration-300"
-            >
-              Login
-              <ArrowRight className="ml-2" />
-            </Link>
-            <Link
-              to="/dashboard"
+              to="/group"
               className="bg-transparent hover:bg-white hover:text-indigo-600 font-bold py-3 px-6 rounded-full inline-flex items-center border-2 border-white transition duration-300"
             >
               Go to Dashboard

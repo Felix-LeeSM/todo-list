@@ -39,9 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(Cookie::getValue)
                 .filter(jwtTokenProvider::validateToken)
                 .map(jwtTokenProvider::getUsernameFromToken)
-                .ifPresent(username -> SecurityContextHolder.getContext().setAuthentication(
-                        new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>())
-                ));
+                .ifPresent(username ->
+                        SecurityContextHolder
+                                .getContext()
+                                .setAuthentication(
+                                        new UsernamePasswordAuthenticationToken(
+                                                username,
+                                                null,
+                                                new ArrayList<>())));
 
         filterChain.doFilter(request, response);
     }

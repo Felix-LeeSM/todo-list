@@ -8,6 +8,8 @@ import rest.felix.back.dto.internal.GroupDTO;
 import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.repository.GroupRepository;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class GroupService {
@@ -26,6 +28,11 @@ public class GroupService {
         groupRepository.registerUserToGroup(createGroupDTO.getUserId(), groupDTO.getId(), GroupRole.OWNER);
 
         return groupDTO;
+    }
+
+    public List<GroupDTO>getGroupsByUserId(long userId) {
+
+        return groupRepository.getGroupsByUserId(userId);
     }
 
 }

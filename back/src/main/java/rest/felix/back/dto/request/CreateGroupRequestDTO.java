@@ -3,12 +3,14 @@ package rest.felix.back.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class CreateGroupRequestDTO {
     @NotNull
-    @Size(min = 10, max = 50)
+    @Size(min = 5, max = 50)
     private String name;
 
 }

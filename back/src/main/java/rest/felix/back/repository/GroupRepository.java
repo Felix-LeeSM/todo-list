@@ -10,6 +10,8 @@ import rest.felix.back.entity.User;
 import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
 
+import java.util.List;
+
 @Repository
 public class GroupRepository {
 
@@ -45,6 +47,27 @@ public class GroupRepository {
 
         em.persist(userGroup);
 
+    }
+
+    public List<GroupDTO> getGroupsByUserId(long userId) {
+        String query = """
+                SELECT
+                    g
+                FROM
+                    UserGroup ug
+                JOIN
+                    ug.group g
+                WHERE
+                    ug.user.id = :userId
+                """;
+
+        return em
+                .createQuery(query, Group.class)
+                .setParameter("userId", userId)
+                .getResultList()
+                .stream()
+                .map(group -> new GroupDTO(group.getId(), group.getName()))
+                .toList();
     }
 
 }

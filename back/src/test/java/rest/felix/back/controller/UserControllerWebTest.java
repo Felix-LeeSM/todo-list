@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,6 +17,10 @@ import rest.felix.back.dto.request.SignInRequestDTO;
 import rest.felix.back.dto.request.SignupRequestDTO;
 import rest.felix.back.repository.UserRepository;
 import rest.felix.back.security.JwtTokenProvider;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -74,6 +77,46 @@ public class UserControllerWebTest {
 
 
     }
+
+    @Test
+    void signUp_Failure_InvalidArguments() throws Exception {
+
+        // Given
+
+        String path = "/api/v1/user";
+
+        List<String> requestBodies = new ArrayList<>();
+        ObjectMapper objectMapper1 = objectMapper;
+        for (String[] row : new String[][]{
+                {null, "nickname", "LongEnoughPassword", "LongEnoughPassword"},
+                {"LongEnoughUsername", null, "LongEnoughPassword", "LongEnoughPassword"},
+                {"LongEnoughUsername", "nickname", null, "LongEnoughPassword"},
+                {"LongEnoughUsername", "nickname", "LongEnoughPassword", null},
+        }) {
+            SignupRequestDTO signupRequestDTO = new SignupRequestDTO(row[0], row[1], row[2], row[3]);
+            String s = objectMapper1.writeValueAsString(signupRequestDTO);
+            requestBodies.add(s);
+        }
+
+
+        // When
+
+        for (String requestBody : requestBodies) {
+            ResultActions result = mvc.perform(
+                    post(path)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON)
+            );
+
+            // Then
+
+            result.andExpect(status().isBadRequest());
+        }
+
+
+    }
+
 
     @Test
     void signUp_Failure_UsernameTooShort() throws Exception {

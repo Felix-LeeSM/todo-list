@@ -30,10 +30,11 @@ public class GroupRepository {
 
         Group group = new Group();
         group.setName(groupName);
+        group.setDescription(createGroupDTO.getDescription());
 
         em.persist(group);
 
-        return new GroupDTO(group.getId(), group.getName());
+        return new GroupDTO(group.getId(), group.getName(), group.getDescription());
     }
 
     public void registerUserToGroup(long userId, long groupId, GroupRole role) {
@@ -66,7 +67,7 @@ public class GroupRepository {
                 .setParameter("userId", userId)
                 .getResultList()
                 .stream()
-                .map(group -> new GroupDTO(group.getId(), group.getName()))
+                .map(group -> new GroupDTO(group.getId(), group.getName(), group.getDescription()))
                 .toList();
     }
 

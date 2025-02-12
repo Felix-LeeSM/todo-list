@@ -37,13 +37,15 @@ public class GroupController {
             @RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
         String username = principal.getName();
         UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
-        String groupName = createGroupRequestDTO.getName();
 
-        CreateGroupDTO createGroupDTO = new CreateGroupDTO(userDTO.getId(), groupName);
+        CreateGroupDTO createGroupDTO = new CreateGroupDTO(
+                userDTO.getId(),
+                createGroupRequestDTO.getName(),
+                createGroupRequestDTO.getDescription());
 
         GroupDTO groupDTO = groupService.createGroup(createGroupDTO);
 
-        GroupResponseDTO groupResponseDTO = new GroupResponseDTO(groupDTO.getId(), groupDTO.getName());
+        GroupResponseDTO groupResponseDTO = new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(), groupDTO.getDescription());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -61,7 +63,7 @@ public class GroupController {
         List<GroupResponseDTO> groupResponseDTOS =
                 groupService.getGroupsByUserId(userId)
                         .stream()
-                        .map(groupDTO -> new GroupResponseDTO(groupDTO.getId(), groupDTO.getName()))
+                        .map(groupDTO -> new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(), groupDTO.getDescription()))
                         .toList();
 
         return ResponseEntity

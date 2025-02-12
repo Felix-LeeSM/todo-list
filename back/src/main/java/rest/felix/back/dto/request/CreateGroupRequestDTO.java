@@ -13,4 +13,9 @@ public class CreateGroupRequestDTO {
     @Size(min = 5, max = 50)
     private String name;
 
+    @NotNull
+    @Size(max = 200)
+
+    private String description;
+
 }

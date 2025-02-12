@@ -8,4 +8,5 @@ import lombok.Getter;
 public class CreateGroupDTO {
     private final long userId;
     private final String groupName;
+    private final String description;
 }

@@ -44,7 +44,7 @@ public class GroupControllerUnitTest {
 
         Principal principal = user::getUsername;
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName");
+        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
 
         // When
 
@@ -69,6 +69,7 @@ public class GroupControllerUnitTest {
                 .getSingleResult();
 
         Assertions.assertEquals("groupName", createdGroup.getName());
+        Assertions.assertEquals("group description", createdGroup.getDescription());
 
         UserGroup userGroup = em.createQuery("""
                         SELECT
@@ -103,7 +104,7 @@ public class GroupControllerUnitTest {
 
         Principal principal = user::getUsername;
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName");
+        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
 
         // When
 
@@ -133,7 +134,8 @@ public class GroupControllerUnitTest {
         Arrays.stream(new int[]{1, 2, 3})
                 .forEach(idx -> {
                     String groupName = String.format("group %d", idx);
-                    groupController.createGroup(user::getUsername, new CreateGroupRequestDTO(groupName));
+                    String groupDescription = String.format("group description %d", idx);
+                    groupController.createGroup(user::getUsername, new CreateGroupRequestDTO(groupName, groupDescription));
                 });
 
         // When
@@ -156,6 +158,26 @@ public class GroupControllerUnitTest {
                         .toList()
                         .containsAll(
                                 List.of("group 1", "group 2", "group 3")
+                        )
+
+        );
+
+        Assertions.assertTrue(
+                groupResponseDTOS
+                        .stream()
+                        .map(GroupResponseDTO::name)
+                        .toList()
+                        .containsAll(
+                                List.of("group 1", "group 2", "group 3")
+                        )
+
+        );        Assertions.assertTrue(
+                groupResponseDTOS
+                        .stream()
+                        .map(GroupResponseDTO::description)
+                        .toList()
+                        .containsAll(
+                                List.of("group description 1", "group description 2", "group description 3")
                         )
 
         );

@@ -57,7 +57,7 @@ public class GroupControllerWebTest {
 
         String path = "/api/v1/group";
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName");
+        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
         String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
         // When
@@ -75,6 +75,7 @@ public class GroupControllerWebTest {
         result.andExpect(status().isCreated());
         result.andExpect(jsonPath("$.id").isNotEmpty());
         result.andExpect(jsonPath("$.name").value("groupName"));
+        result.andExpect(jsonPath("$.description").value("group description"));
 
 
     }
@@ -96,7 +97,7 @@ public class GroupControllerWebTest {
 
         String path = "/api/v1/group";
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName");
+        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "description");
         String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
         // When
@@ -122,7 +123,7 @@ public class GroupControllerWebTest {
 
         String path = "/api/v1/group";
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName");
+        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
         String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
         // When
@@ -155,22 +156,27 @@ public class GroupControllerWebTest {
 
         String path = "/api/v1/group";
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO(null);
-        String body = objectMapper.writeValueAsString(createGroupRequestDTO);
+        for (String[] row : new String[][]{{"groupName", null}, {null, "group description"}}) {
+            CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO(row[0], row[1]);
+            String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
-        // When
 
-        ResultActions result = mvc.perform(
-                post(path)
-                        .cookie(cookie)
-                        .content(body)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-        );
+            // When
 
-        // Then
+            ResultActions result = mvc.perform(
+                    post(path)
+                            .cookie(cookie)
+                            .content(body)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON)
+            );
 
-        result.andExpect(status().isBadRequest());
+            // Then
+
+            result.andExpect(status().isBadRequest());
+
+        }
+
 
     }
 
@@ -190,7 +196,7 @@ public class GroupControllerWebTest {
         Cookie cookie = userCookie(user.getUsername());
 
         for (int idx : new int[]{1, 2, 3}) {
-            CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName");
+            CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
             String body = objectMapper.writeValueAsString(createGroupRequestDTO);
             mvc.perform(
                             post("/api/v1/group")

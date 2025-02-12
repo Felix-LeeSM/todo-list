@@ -35,7 +35,7 @@ class GroupServiceTest {
 
         em.persist(user);
 
-        CreateGroupDTO createGroupDTO = new CreateGroupDTO(user.getId(), "groupName");
+        CreateGroupDTO createGroupDTO = new CreateGroupDTO(user.getId(), "groupName", "group description");
 
         em.flush();
 
@@ -53,6 +53,7 @@ class GroupServiceTest {
                 .getSingleResult();
 
         Assertions.assertEquals(createdGroup.getId(), groupDTO.getId());
+        Assertions.assertEquals("group description", createdGroup.getDescription());
 
     }
 
@@ -67,7 +68,7 @@ class GroupServiceTest {
 
         em.persist(user);
 
-        CreateGroupDTO createGroupDTO = new CreateGroupDTO(user.getId(), "groupName");
+        CreateGroupDTO createGroupDTO = new CreateGroupDTO(user.getId(), "groupName", "group description");
 
         em.remove(user);
         em.flush();
@@ -102,8 +103,16 @@ class GroupServiceTest {
         em.persist(user2);
 
         Arrays.stream(new int[]{1, 2, 3}).forEach(idx -> {
-            groupService.createGroup(new CreateGroupDTO(user1.getId(), String.format("user1 group%d", idx)));
-            groupService.createGroup(new CreateGroupDTO(user2.getId(), String.format("user2 group%d", idx)));
+            groupService.createGroup(
+                    new CreateGroupDTO(
+                            user1.getId(),
+                            String.format("user1 group%d", idx),
+                            String.format("user1 group%d description", idx)));
+            groupService.createGroup(
+                    new CreateGroupDTO(
+                            user2.getId(),
+                            String.format("user2 group%d", idx),
+                            String.format("user2 group%d description", idx)));
         });
 
         em.flush();
@@ -127,12 +136,28 @@ class GroupServiceTest {
                 )
         );
 
+        Assertions.assertTrue(user1GroupDTOs.stream()
+                .map(GroupDTO::getDescription)
+                .toList()
+                .containsAll(
+                        List.of("user1 group1 description", "user1 group2 description", "user1 group3 description")
+                )
+        );
+
 
         Assertions.assertTrue(user2GroupDTOs.stream()
                 .map(GroupDTO::getName)
                 .toList()
                 .containsAll(
                         List.of("user2 group1", "user2 group2", "user2 group3")
+                )
+        );
+
+        Assertions.assertTrue(user2GroupDTOs.stream()
+                .map(GroupDTO::getDescription)
+                .toList()
+                .containsAll(
+                        List.of("user2 group1 description", "user2 group2 description", "user2 group3 description")
                 )
         );
 

@@ -26,6 +26,9 @@ public class Group {
     @Column(nullable = false, length = 200)
     private String name;
 
+    @Column(nullable = false, length = 200)
+    private String description = "";
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserGroup> userGroups = new ArrayList<>();
 

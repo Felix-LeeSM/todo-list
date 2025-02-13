@@ -11,6 +11,9 @@ import rest.felix.back.dto.internal.CreateGroupDTO;
 import rest.felix.back.dto.internal.GroupDTO;
 import rest.felix.back.entity.Group;
 import rest.felix.back.entity.User;
+import rest.felix.back.entity.UserGroup;
+import rest.felix.back.entity.enumerated.GroupRole;
+import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -214,5 +217,141 @@ class GroupServiceTest {
         Assertions.assertEquals(0, userGroupDTOs.size());
 
 
+    }
+
+//    GroupRole getUserRoleInGroup(long userId, long groupId)
+
+    @Test
+    void getUserRoleInGroup_HappyPath() {
+
+        // Given
+
+        User user = new User();
+        user.setNickname("nickname1");
+        user.setUsername("username1");
+        user.setHashedPassword("hashedPassword");
+
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group");
+        group.setDescription("test group");
+
+        em.persist(group);
+
+        for (GroupRole groupRole : new GroupRole[] {GroupRole.VIEWER, GroupRole.MEMBER, GroupRole.MANAGER, GroupRole.OWNER}) {
+
+
+            UserGroup userGroup = new UserGroup();
+            userGroup.setGroupRole(groupRole);
+            userGroup.setUser(user);
+            userGroup.setGroup(group);
+
+            em.persist(userGroup);
+
+            em.flush();
+
+        // When
+
+            GroupRole foundGroupRole = groupService.getUserRoleInGroup(user.getId(), group.getId());
+
+        // Then
+
+            Assertions.assertEquals(groupRole, foundGroupRole);
+
+            em.remove(userGroup);
+            em.flush();
+        }
+    }
+
+    @Test
+    void getUserRoleInGroup_Failure_NotInGroup() {
+
+        // Given
+
+        User user = new User();
+        user.setNickname("nickname1");
+        user.setUsername("username1");
+        user.setHashedPassword("hashedPassword");
+
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group");
+        group.setDescription("test group");
+
+        em.persist(group);
+
+        em.flush();
+
+        // When
+
+        Runnable lambda = () -> groupService.getUserRoleInGroup(user.getId(), group.getId());
+
+        // Then
+
+        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+    }
+
+    @Test
+    void getUserRoleInGroup_Failure_NoUser() {
+        // Given
+
+        User user = new User();
+        user.setNickname("nickname1");
+        user.setUsername("username1");
+        user.setHashedPassword("hashedPassword");
+
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group");
+        group.setDescription("test group");
+
+        em.persist(group);
+
+        em.flush();
+
+        em.remove(user);
+        em.flush();
+
+        // When
+
+        Runnable lambda = () -> groupService.getUserRoleInGroup(user.getId(), group.getId());
+
+        // Then
+
+        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+    }
+
+    @Test
+    void getUserRoleInGroup_Failure_NoGroup() {
+        // Given
+
+        User user = new User();
+        user.setNickname("nickname1");
+        user.setUsername("username1");
+        user.setHashedPassword("hashedPassword");
+
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group");
+        group.setDescription("test group");
+
+        em.persist(group);
+
+        em.flush();
+
+        em.remove(group);
+        em.flush();
+
+        // When
+
+        Runnable lambda = () -> groupService.getUserRoleInGroup(user.getId(), group.getId());
+
+        // Then
+
+        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
     }
 }

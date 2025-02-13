@@ -30,7 +30,13 @@ public class Todo {
     @ManyToOne
     private Group group;
 
-    @Column
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TodoStatus todoStatus = TodoStatus.PENDING;
 

@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 @Setter
 @ToString
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "groupId"}))
 public class UserGroup {
 
     @Id
@@ -30,6 +31,7 @@ public class UserGroup {
     @JoinColumn
     private Group group;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private GroupRole groupRole;
 

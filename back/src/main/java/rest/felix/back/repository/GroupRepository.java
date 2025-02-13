@@ -6,9 +6,6 @@ import org.springframework.stereotype.Repository;
 import rest.felix.back.dto.internal.CreateGroupDTO;
 import rest.felix.back.dto.internal.GroupDTO;
 import rest.felix.back.entity.Group;
-import rest.felix.back.entity.User;
-import rest.felix.back.entity.UserGroup;
-import rest.felix.back.entity.enumerated.GroupRole;
 
 import java.util.List;
 
@@ -26,8 +23,6 @@ public class GroupRepository {
         long userId = createGroupDTO.getUserId();
         String groupName = createGroupDTO.getGroupName();
 
-        User userRef = em.getReference(User.class, userId);
-
         Group group = new Group();
         group.setName(groupName);
         group.setDescription(createGroupDTO.getDescription());
@@ -35,19 +30,6 @@ public class GroupRepository {
         em.persist(group);
 
         return new GroupDTO(group.getId(), group.getName(), group.getDescription());
-    }
-
-    public void registerUserToGroup(long userId, long groupId, GroupRole role) {
-        User userRef = em.getReference(User.class, userId);
-        Group groupRef = em.getReference(Group.class, groupId);
-
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(userRef);
-        userGroup.setGroup(groupRef);
-        userGroup.setGroupRole(role);
-
-        em.persist(userGroup);
-
     }
 
     public List<GroupDTO> getGroupsByUserId(long userId) {

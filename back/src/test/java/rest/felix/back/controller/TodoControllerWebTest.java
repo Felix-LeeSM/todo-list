@@ -75,10 +75,10 @@ public class TodoControllerWebTest {
         em.persist(userGroup);
 
         List<Pair<TodoStatus, Integer>> list = Arrays.asList(
-                new Pair<>(TodoStatus.PENDING, 1),
-                new Pair<>(TodoStatus.ACTIVE, 2),
-                new Pair<>(TodoStatus.IMMINENT, 3),
-                new Pair<>(TodoStatus.DONE, 4)
+                new Pair<>(TodoStatus.TO_DO, 1),
+                new Pair<>(TodoStatus.IN_PROGRESS, 2),
+                new Pair<>(TodoStatus.DONE, 3),
+                new Pair<>(TodoStatus.ON_HOLD, 4)
         );
 
         list.forEach(pair -> {
@@ -118,7 +118,8 @@ public class TodoControllerWebTest {
         result.andExpect(jsonPath("$[*].groupId", everyItem(equalTo(group.getId().intValue()))));
         result.andExpect(jsonPath("$[*].title", containsInAnyOrder("todo 1", "todo 2", "todo 3", "todo 4")));
         result.andExpect(jsonPath("$[*].description", containsInAnyOrder("todo 1 description", "todo 2 description", "todo 3 description", "todo 4 description")));
-        result.andExpect(jsonPath("$[*].todoStatus", containsInAnyOrder("PENDING", "ACTIVE", "IMMINENT", "DONE")));
+        result.andExpect(jsonPath("$[*].status", containsInAnyOrder("TO_DO", "IN_PROGRESS", "DONE", "ON_HOLD")));
+
     }
 
     @Test
@@ -370,7 +371,7 @@ public class TodoControllerWebTest {
         result.andExpect(jsonPath("$.groupId", equalTo(group.getId().intValue())));
         result.andExpect(jsonPath("$.title", equalTo("todo title")));
         result.andExpect(jsonPath("$.description", equalTo("todo description")));
-        result.andExpect(jsonPath("$.todoStatus", equalTo("PENDING")));
+        result.andExpect(jsonPath("$.status", equalTo("PENDING")));
 
     }
 

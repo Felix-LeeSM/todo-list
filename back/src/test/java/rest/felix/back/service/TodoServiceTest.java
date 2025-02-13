@@ -67,7 +67,7 @@ class TodoServiceTest {
 
         Assertions.assertTrue(todoDTOs
                 .stream()
-                .map(TodoDTO::getTodoStatus)
+                .map(TodoDTO::getStatus)
                 .map(status -> status == TodoStatus.PENDING)
                 .reduce(true, (one, another) -> one && another));
 
@@ -191,7 +191,7 @@ class TodoServiceTest {
 
         Assertions.assertEquals("todo title", todoDTO.getTitle());
         Assertions.assertEquals("todo description", todoDTO.getDescription());
-        Assertions.assertEquals(TodoStatus.PENDING, todoDTO.getTodoStatus());
+        Assertions.assertEquals(TodoStatus.PENDING, todoDTO.getStatus());
         Assertions.assertEquals(user.getId(), todoDTO.getAuthorId());
         Assertions.assertEquals(group.getId(), todoDTO.getGroupId());
 

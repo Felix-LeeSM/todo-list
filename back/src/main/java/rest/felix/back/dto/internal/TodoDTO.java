@@ -10,7 +10,7 @@ public class TodoDTO {
     private final long id;
     private final String title;
     private final String description;
-    private final TodoStatus todoStatus;
+    private final TodoStatus status;
     private final long authorId;
     private final long groupId;
 

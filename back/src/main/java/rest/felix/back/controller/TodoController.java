@@ -47,7 +47,7 @@ public class TodoController {
         List<TodoResponseDTO> todoResponseDTOs = todoService
                 .getTodosInGroup(groupId)
                 .stream()
-                .map(todoDTO -> new TodoResponseDTO(todoDTO.getId(), todoDTO.getTitle(), todoDTO.getDescription(), todoDTO.getTodoStatus(), todoDTO.getAuthorId(), todoDTO.getGroupId()))
+                .map(todoDTO -> new TodoResponseDTO(todoDTO.getId(), todoDTO.getTitle(), todoDTO.getDescription(), todoDTO.getStatus(), todoDTO.getAuthorId(), todoDTO.getGroupId()))
                 .toList();
 
 
@@ -72,7 +72,7 @@ public class TodoController {
 
         TodoDTO todoDTO = todoService.createTodo(createTodoDTO);
 
-        TodoResponseDTO todoResponseDTO = new TodoResponseDTO(todoDTO.getId(), todoDTO.getTitle(), todoDTO.getDescription(), todoDTO.getTodoStatus(), todoDTO.getAuthorId(), todoDTO.getGroupId());
+        TodoResponseDTO todoResponseDTO = new TodoResponseDTO(todoDTO.getId(), todoDTO.getTitle(), todoDTO.getDescription(), todoDTO.getStatus(), todoDTO.getAuthorId(), todoDTO.getGroupId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -38,7 +38,7 @@ public class Todo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TodoStatus todoStatus = TodoStatus.PENDING;
+    private TodoStatus todoStatus = TodoStatus.TO_DO;
 
     @CreationTimestamp
     private OffsetDateTime createdAt;

@@ -43,18 +43,23 @@ public class TodoRepository {
 
 
     public TodoDTO createTodo(CreateTodoDTO createTodoDTO) {
-        Todo todo = new Todo();
+        try {
+            Todo todo = new Todo();
 
-        User author = em.getReference(User.class, createTodoDTO.getAuthorId());
-        Group group = em.getReference(Group.class, createTodoDTO.getGroupId());
+            User author = em.getReference(User.class, createTodoDTO.getAuthorId());
+            Group group = em.getReference(Group.class, createTodoDTO.getGroupId());
 
-        todo.setAuthor(author);
-        todo.setGroup(group);
-        todo.setTitle(createTodoDTO.getTitle());
-        todo.setDescription(createTodoDTO.getDescription());
+            todo.setAuthor(author);
+            todo.setGroup(group);
+            todo.setTitle(createTodoDTO.getTitle());
+            todo.setDescription(createTodoDTO.getDescription());
 
-        em.persist(todo);
+            em.persist(todo);
 
-        return new TodoDTO(todo.getId(), todo.getTitle(), todo.getDescription(), todo.getTodoStatus(), todo.getAuthor().getId(), todo.getGroup().getId());
+            return new TodoDTO(todo.getId(), todo.getTitle(), todo.getDescription(), todo.getTodoStatus(), todo.getAuthor().getId(), todo.getGroup().getId());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw e;
+        }
     }
 }

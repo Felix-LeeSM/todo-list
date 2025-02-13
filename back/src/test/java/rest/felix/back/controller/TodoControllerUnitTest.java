@@ -59,10 +59,10 @@ public class TodoControllerUnitTest {
         em.persist(userGroup);
 
         List<Pair<TodoStatus, Integer>> list = Arrays.asList(
-                new Pair<>(TodoStatus.PENDING, 1),
-                new Pair<>(TodoStatus.ACTIVE, 2),
-                new Pair<>(TodoStatus.IMMINENT, 3),
-                new Pair<>(TodoStatus.DONE, 4)
+                new Pair<>(TodoStatus.TO_DO, 1),
+                new Pair<>(TodoStatus.IN_PROGRESS, 2),
+                new Pair<>(TodoStatus.DONE, 3),
+                new Pair<>(TodoStatus.ON_HOLD, 4)
         );
 
         list.forEach(pair -> {
@@ -131,7 +131,7 @@ public class TodoControllerUnitTest {
         Assertions.assertTrue(
                 todoResponseDTOs
                         .stream()
-                        .map(TodoResponseDTO::todoStatus)
+                        .map(TodoResponseDTO::status)
                         .toList()
                         .containsAll(
                                 List.of(TodoStatus.PENDING, TodoStatus.ACTIVE, TodoStatus.IMMINENT, TodoStatus.DONE)
@@ -345,7 +345,7 @@ public class TodoControllerUnitTest {
 
         Assertions.assertEquals("todo title", todoResponseDTO.title());
         Assertions.assertEquals("todo description", todoResponseDTO.description());
-        Assertions.assertEquals(TodoStatus.PENDING, todoResponseDTO.todoStatus());
+        Assertions.assertEquals(TodoStatus.PENDING, todoResponseDTO.status());
         Assertions.assertEquals(user.getId(), todoResponseDTO.authorId());
         Assertions.assertEquals(group.getId(), todoResponseDTO.groupId());
     }

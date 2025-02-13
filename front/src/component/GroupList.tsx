@@ -41,6 +41,7 @@ export default function GroupList() {
         {groups.map((group) => (
           <GroupCard
             group={group}
+            key={group.id}
             onClick={() => navigate(`/group/${group.id}`)}
           />
         ))}

@@ -8,6 +8,8 @@ import rest.felix.back.dto.internal.GroupDTO;
 import rest.felix.back.dto.internal.UserGroupDTO;
 import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
+import rest.felix.back.exception.throwable.notfound.GroupNotFoundException;
+import rest.felix.back.exception.throwable.notfound.NotFoundException;
 import rest.felix.back.repository.GroupRepository;
 import rest.felix.back.repository.UserGroupRepository;
 
@@ -40,12 +42,16 @@ public class GroupService {
         return groupRepository.getGroupsByUserId(userId);
     }
 
+    public GroupDTO getGroupById(long groupId) {
+
+        return groupRepository.getById(groupId).orElseThrow(GroupNotFoundException::new);
+    }
+
     public GroupRole getUserRoleInGroup(long userId, long groupId) {
         return userGroupRepository
                 .getByUserIdAndGroupId(userId, groupId)
                 .map(UserGroupDTO::getGroupRole)
                 .orElseThrow(UserAccessDeniedException::new);
-
 
     }
 

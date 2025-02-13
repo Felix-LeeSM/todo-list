@@ -1,6 +1,7 @@
 package rest.felix.back.repository;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import rest.felix.back.dto.internal.CreateGroupDTO;
@@ -8,6 +9,7 @@ import rest.felix.back.dto.internal.GroupDTO;
 import rest.felix.back.entity.Group;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class GroupRepository {
@@ -53,4 +55,28 @@ public class GroupRepository {
                 .toList();
     }
 
+
+    public Optional<GroupDTO> getById(long groupId) {
+        try {
+            String query = """
+                    SELECT
+                        g
+                    FROM
+                        Group g
+                    WHERE
+                        g.id = :groupId
+                    """;
+
+            return
+                    Optional.of(
+                                    em
+                                            .createQuery(query, Group.class)
+                                            .setParameter("groupId", groupId)
+                                            .getSingleResult())
+                            .map(group -> new GroupDTO(group.getId(), group.getName(), group.getDescription()));
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+
+    }
 }

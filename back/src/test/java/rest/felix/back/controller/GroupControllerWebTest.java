@@ -13,7 +13,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import rest.felix.back.dto.request.CreateGroupRequestDTO;
+import rest.felix.back.entity.Group;
 import rest.felix.back.entity.User;
+import rest.felix.back.entity.UserGroup;
+import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.security.JwtTokenProvider;
 
 import static org.hamcrest.Matchers.*;
@@ -225,6 +228,7 @@ public class GroupControllerWebTest {
         result.andExpect(jsonPath("$", hasSize(3)));
         result.andExpect(jsonPath("$[*].id", everyItem(notNullValue())));
         result.andExpect(jsonPath("$[*].name", everyItem(equalTo("groupName"))));
+        result.andExpect(jsonPath("$[*].description", everyItem(equalTo("group description"))));
 
     }
 
@@ -279,6 +283,239 @@ public class GroupControllerWebTest {
 
 
         result.andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    public void getUserGroup_HappyPath() throws Exception {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username123");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        Cookie cookie = userCookie(user.getUsername());
+
+        String path = String.format("/api/v1/group/%d", group.getId());
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.id", notNullValue()));
+        result.andExpect(jsonPath("$.name", equalTo("group name")));
+        result.andExpect(jsonPath("$.description", equalTo("group description")));
+
+    }
+
+    @Test
+    public void getUserGroup_Failure_NoCookie() throws Exception {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username123");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+
+        String path = String.format("/api/v1/group/%d", group.getId());
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+
+        result.andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    public void getUserGroup_Failure_NoUser() throws Exception {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username123");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        em.remove(userGroup);
+        em.remove(user);
+
+        em.flush();
+
+        Cookie cookie = userCookie(user.getUsername());
+
+        String path = String.format("/api/v1/group/%d", group.getId());
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+
+        result.andExpect(status().isUnauthorized());
+        result.andExpect(jsonPath("$.message", equalTo("There is no user with given conditions.")));
+
+    }
+
+    @Test
+    public void getUserGroup_Failure_NoGroup() throws Exception {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username123");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        em.remove(userGroup);
+        em.remove(group);
+
+        em.flush();
+
+        Cookie cookie = userCookie(user.getUsername());
+
+        String path = String.format("/api/v1/group/%d", group.getId());
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+
+        result.andExpect(status().isNotFound());
+        result.andExpect(jsonPath("$.message", equalTo("Group Not Found.")));
+
+    }
+
+    @Test
+    public void getUserGroup_Failure_NoUserGroup() throws Exception {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username123");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        em.remove(userGroup);
+
+        em.flush();
+
+        Cookie cookie = userCookie(user.getUsername());
+
+        String path = String.format("/api/v1/group/%d", group.getId());
+
+        // When
+
+        ResultActions result = mvc.perform(
+                get(path)
+                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // Then
+
+        result.andExpect(status().isForbidden());
+        result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
 
     }
 

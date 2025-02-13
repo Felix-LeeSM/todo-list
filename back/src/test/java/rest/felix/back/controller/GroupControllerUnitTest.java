@@ -15,6 +15,8 @@ import rest.felix.back.entity.Group;
 import rest.felix.back.entity.User;
 import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
+import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
+import rest.felix.back.exception.throwable.notfound.GroupNotFoundException;
 import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 
 import java.security.Principal;
@@ -237,6 +239,169 @@ public class GroupControllerUnitTest {
         // Then
 
         Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+
+    }
+
+    @Test
+    public void getUserGroup_HappyPath() {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        Principal principal = user::getUsername;
+
+        // When
+
+        ResponseEntity<GroupResponseDTO> responseEntity = groupController.getUserGroup(principal, group.getId());
+
+        // Then
+
+        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        GroupResponseDTO groupResponseDTO = responseEntity.getBody();
+        Assertions.assertNotNull(groupResponseDTO.id());
+        Assertions.assertEquals("group name", groupResponseDTO.name());
+        Assertions.assertEquals("group description", groupResponseDTO.description());
+
+    }
+
+    @Test
+    public void getUserGroup_NoGroup() {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        em.remove(userGroup);
+        em.remove(group);
+
+        em.flush();
+
+        Principal principal = user::getUsername;
+
+        // When
+
+        Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+
+        // Then
+
+        Assertions.assertThrows(GroupNotFoundException.class, lambda::run);
+
+    }
+
+    @Test
+    public void getUserGroup_NoUser() {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        em.remove(userGroup);
+        em.remove(user);
+
+        em.flush();
+
+        Principal principal = user::getUsername;
+
+        // When
+
+        Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+
+        // Then
+
+        Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+
+    }
+
+    @Test
+    public void getUserGroup_NoUserGroup() {
+
+        // Given
+
+        User user = new User();
+        user.setUsername("username");
+        user.setNickname("nickname");
+        user.setHashedPassword("hashedPassword");
+        em.persist(user);
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+        em.persist(group);
+
+        UserGroup userGroup = new UserGroup();
+        userGroup.setGroupRole(GroupRole.OWNER);
+        userGroup.setUser(user);
+        userGroup.setGroup(group);
+        em.persist(userGroup);
+
+        em.flush();
+
+        em.remove(userGroup);
+
+        em.flush();
+
+        Principal principal = user::getUsername;
+
+        // When
+
+        Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+
+        // Then
+
+        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
 
     }
 

@@ -1,6 +1,5 @@
 package rest.felix.back.controller;
 
-
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,54 +21,73 @@ import java.util.List;
 @RequestMapping("/api/v1/group")
 public class GroupController {
 
-    private final UserService userService;
-    private final GroupService groupService;
+        private final UserService userService;
+        private final GroupService groupService;
 
-    @Autowired
-    GroupController(UserService userService, GroupService groupService) {
-        this.userService = userService;
-        this.groupService = groupService;
-    }
+        @Autowired
+        GroupController(UserService userService, GroupService groupService) {
+                this.userService = userService;
+                this.groupService = groupService;
+        }
 
-    @PostMapping
-    public ResponseEntity<GroupResponseDTO> createGroup(
-            Principal principal,
-            @RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
-        String username = principal.getName();
-        UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
+        @PostMapping
+        public ResponseEntity<GroupResponseDTO> createGroup(
+                        Principal principal,
+                        @RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
+                String username = principal.getName();
+                UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
 
-        CreateGroupDTO createGroupDTO = new CreateGroupDTO(
-                userDTO.getId(),
-                createGroupRequestDTO.getName(),
-                createGroupRequestDTO.getDescription());
+                CreateGroupDTO createGroupDTO = new CreateGroupDTO(
+                                userDTO.getId(),
+                                createGroupRequestDTO.getName(),
+                                createGroupRequestDTO.getDescription());
 
-        GroupDTO groupDTO = groupService.createGroup(createGroupDTO);
+                GroupDTO groupDTO = groupService.createGroup(createGroupDTO);
 
-        GroupResponseDTO groupResponseDTO = new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(), groupDTO.getDescription());
+                GroupResponseDTO groupResponseDTO = new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(),
+                                groupDTO.getDescription());
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(groupResponseDTO);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(groupResponseDTO);
+        }
 
-    @GetMapping
-    public ResponseEntity<List<GroupResponseDTO>> getUserGroups(
-            Principal principal
-    ) {
-        String username = principal.getName();
-        UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
-        long userId = userDTO.getId();
+        @GetMapping
+        public ResponseEntity<List<GroupResponseDTO>> getUserGroups(
+                        Principal principal) {
+                String username = principal.getName();
+                UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
+                long userId = userDTO.getId();
 
-        List<GroupResponseDTO> groupResponseDTOS =
-                groupService.getGroupsByUserId(userId)
-                        .stream()
-                        .map(groupDTO -> new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(), groupDTO.getDescription()))
-                        .toList();
+                List<GroupResponseDTO> groupResponseDTOS = groupService.getGroupsByUserId(userId)
+                                .stream()
+                                .map(groupDTO -> new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(),
+                                                groupDTO.getDescription()))
+                                .toList();
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(groupResponseDTOS);
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(groupResponseDTOS);
 
-    }
+        }
+
+        @GetMapping("/{groupId}")
+        public ResponseEntity<GroupResponseDTO> getUserGroup(
+                        Principal principal,
+                        @PathVariable(name = "groupId") long groupId) {
+                String username = principal.getName();
+                UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
+                long userId = userDTO.getId();
+
+                GroupDTO groupDTO = groupService.getGroupById(groupId);
+                groupService.getUserRoleInGroup(userId, groupDTO.getId());
+                GroupResponseDTO groupResponseDTO = new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(),
+                                groupDTO.getDescription());
+
+                return ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(groupResponseDTO);
+
+        }
 
 }

@@ -14,6 +14,7 @@ import rest.felix.back.entity.User;
 import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
+import rest.felix.back.exception.throwable.notfound.GroupNotFoundException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -354,4 +355,52 @@ class GroupServiceTest {
 
         Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
     }
+
+
+    @Test
+    void getGroupById_HappyPath() {
+        // Given
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+
+        em.persist(group);
+        em.flush();
+
+        // When
+
+        GroupDTO groupDTO = groupService.getGroupById(group.getId());
+
+        // Then
+
+        Assertions.assertNotNull(groupDTO.getId());
+        Assertions.assertEquals("group name", groupDTO.getName());
+        Assertions.assertEquals("group description", groupDTO.getDescription());
+
+    }
+
+    @Test
+    void getGroupById_Failure_NoGroup() {
+        // Given
+
+        Group group = new Group();
+        group.setName("group name");
+        group.setDescription("group description");
+
+        em.persist(group);
+        em.flush();
+
+        em.remove(group);
+        em.flush();
+
+        // When
+
+        Runnable lambda = () -> groupService.getGroupById(group.getId());
+
+        // Then
+
+        Assertions.assertThrows(GroupNotFoundException.class, lambda::run);
+    }
+
 }

@@ -22,7 +22,7 @@ export default function TodoManager({ group }: TodoManagerProps) {
     setTodos((todos) => [...todos, todo]);
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">{group.name} - Tasks</h2>
+      <h2 className="text-2xl font-bold mb-4">{group.name} - Todos</h2>
       <div className="grid grid-cols-4 gap-4">
         {(["TO_DO", "IN_PROGRESS", "DONE", "ON_HOLD"] as const).map(
           (status) => (
@@ -34,7 +34,7 @@ export default function TodoManager({ group }: TodoManagerProps) {
         )}
       </div>
       <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">Add New Task</h3>
+        <h3 className="text-lg font-semibold mb-2">Add New Todo</h3>
         <TodoForm onSubmit={addTodo} />
       </div>
     </div>

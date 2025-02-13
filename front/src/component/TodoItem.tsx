@@ -35,7 +35,7 @@ export default function TodoItem({ todo }: TodoItemProps) {
       <div className="mr-2 cursor-move">
         <GripVertical className="w-5 h-5 text-gray-400" />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <h3 className="font-medium truncate">{todo.title}</h3>
         <p className="text-sm text-gray-600 mt-1">{todo.description}</p>
       </div>

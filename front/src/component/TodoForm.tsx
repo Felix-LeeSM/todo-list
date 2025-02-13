@@ -35,6 +35,7 @@ export default function TodoForm({ onSubmit }: TodoFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          maxLength={30}
           placeholder="Enter Todo title"
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         />

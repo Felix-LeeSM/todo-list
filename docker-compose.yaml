@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   back:
     build:
@@ -22,9 +21,6 @@ services:
       - "443:443"
     depends_on:
       - back
-    # environment:
-    #   - SSL_CERTIFICATE=${SSL_CERTIFICATE}
-    #   - SSL_CERTIFICATE_KEY=${SSL_CERTIFICATE_KEY}
-    # volumes:
-    #   - ${SSL_CERTIFICATE}:${SSL_CERTIFICATE}:ro
-    #   - ${SSL_CERTIFICATE_KEY}:${SSL_CERTIFICATE_KEY}:ro
+    volumes:
+      - /etc/letsencrypt/live/www.days-archive.shop/fullchain.pem:/etc/letsencrypt/live/www.days-archive.shop/fullchain.pem:ro
+      - /etc/letsencrypt/live/www.days-archive.shop/privkey.pem:/etc/letsencrypt/live/www.days-archive.shop/privkey.pem:ro

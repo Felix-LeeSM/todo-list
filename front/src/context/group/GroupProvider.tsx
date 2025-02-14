@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { LoaderCircle } from "lucide-react";
 import { GroupContext } from "./GroupContext";
-import { GroupInterface } from "../../type/Group.interface";
+import type { GroupInterface } from "../../type/Group.interface";
 
 export function GroupProvider({
   children,

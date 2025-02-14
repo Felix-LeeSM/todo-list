@@ -34,10 +34,10 @@ export default function TodoCard({ todo, onDelete }: TodoCardProps) {
         statusColors[todo.status]
       } flex items-center`}
     >
-      <div className="mr-2 cursor-move">
+      <div className="cursor-move">
         <GripVertical className="w-5 h-5 text-gray-400" />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="ml-2 flex-1 min-w-0">
         <h3 className="font-medium truncate">{todo.title}</h3>
         <p className="text-sm text-gray-600 mt-1">{todo.description}</p>
       </div>

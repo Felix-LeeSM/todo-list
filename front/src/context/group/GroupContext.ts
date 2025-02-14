@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { GroupInterface } from "../../type/Group.interface";
+import type { GroupInterface } from "../../type/Group.interface";
 
 export interface GroupContextType {
   group?: GroupInterface;

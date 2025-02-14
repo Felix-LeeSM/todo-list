@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import axios from "axios";
-import { UserInterface } from "../../type/User.interface";
+import type { UserInterface } from "../../type/User.interface";
 import { LoaderCircle } from "lucide-react";
 
 export function AuthProvider({

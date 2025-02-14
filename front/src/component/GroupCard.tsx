@@ -1,5 +1,5 @@
 import { Folder, Trash2 } from "lucide-react";
-import { GroupInterface } from "../type/Group.interface";
+import type { GroupInterface } from "../type/Group.interface";
 
 export interface GroupCardProps {
   group: GroupInterface;

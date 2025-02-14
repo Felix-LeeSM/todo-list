@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useContext, useState } from "react";
-import { UserInterface } from "../type/User.interface";
+import type { UserInterface } from "../type/User.interface";
 import { AuthContext } from "../context/auth/AuthContext";
 import { User, Lock, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";

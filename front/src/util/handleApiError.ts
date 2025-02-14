@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ErrorInterface } from "../type/Error.interface";
+import type { ErrorInterface } from "../type/Error.interface";
 import { toast } from "react-toastify";
 
 export const handleApiError = (err: unknown) => {

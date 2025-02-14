@@ -1,5 +1,5 @@
-import { TodoInterface } from "../type/Todo.interface";
-import { TodoStatus } from "../type/TodoStatus";
+import type { TodoInterface } from "../type/Todo.interface";
+import type { TodoStatus } from "../type/TodoStatus";
 import TodoCard from "./TodoCard";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 

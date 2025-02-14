@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { UserInterface } from "../type/User.interface";
+import type { UserInterface } from "../type/User.interface";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, IdCard, LoaderCircle } from "lucide-react";
 import { LoadingButton } from "./LoadingButton";

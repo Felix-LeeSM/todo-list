@@ -3,6 +3,8 @@ import { useState } from "react";
 import { UserInterface } from "../type/User.interface";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, IdCard } from "lucide-react";
+import { toast } from "react-toastify";
+import { ErrorInterface } from "../type/Error.interface";
 
 export function SignUpForm() {
   const [username, setUsername] = useState("");
@@ -18,7 +20,12 @@ export function SignUpForm() {
     axios
       .post<UserInterface>("/api/v1/user", body)
       .then(() => navigate("/signin"))
-      .catch(() => {});
+      .catch(
+        (err) =>
+          axios.isAxiosError<ErrorInterface>(err) &&
+          err.response &&
+          toast.error(err.response.data.message)
+      );
   };
 
   return (
@@ -78,7 +85,7 @@ export function SignUpForm() {
               type="password"
               autoComplete="new-password"
               required
-              className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -100,7 +107,7 @@ export function SignUpForm() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Confirm Password"
-                value={password}
+                value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>

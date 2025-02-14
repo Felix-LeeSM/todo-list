@@ -3,6 +3,8 @@ import { useContext, useState } from "react";
 import { UserInterface } from "../type/User.interface";
 import { AuthContext } from "../context/auth/AuthContext";
 import { User, Lock } from "lucide-react";
+import { ErrorInterface } from "../type/Error.interface";
+import { toast } from "react-toastify";
 
 export function SignInForm(props: {
   handleSubmit?: (e: React.FormEvent) => void;
@@ -21,7 +23,12 @@ export function SignInForm(props: {
       })
       .then((res) => handleSignIn(res.data))
       .then(() => props.handleSubmit && props.handleSubmit(e))
-      .catch(() => {});
+      .catch(
+        (err) =>
+          axios.isAxiosError<ErrorInterface>(err) &&
+          err.response &&
+          toast.error(err.response.data.message)
+      );
   };
 
   return (

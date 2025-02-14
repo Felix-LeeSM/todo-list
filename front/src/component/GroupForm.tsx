@@ -1,9 +1,12 @@
 import { useState } from "react";
 import type { GroupInterface } from "../type/Group.interface";
 import { X } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { ErrorInterface } from "../type/Error.interface";
 
 interface GroupFormProps {
-  onSubmit: (group: Omit<GroupInterface, "id">) => void;
+  onSubmit: (group: GroupInterface) => void;
   onClose: () => void;
 }
 
@@ -13,8 +16,17 @@ export default function GroupForm({ onSubmit, onClose }: GroupFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, description });
-    onClose();
+
+    axios
+      .post<GroupInterface>("/api/v1/group", { name, description })
+      .then((response) => onSubmit(response.data))
+      .then(() => onClose())
+      .catch(
+        (err) =>
+          axios.isAxiosError<ErrorInterface>(err) &&
+          err.response &&
+          toast.error(err.response.data.message)
+      );
   };
 
   return (

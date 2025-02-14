@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import type { GroupInterface } from "../type/Group.interface";
 import { Plus } from "lucide-react";
@@ -19,11 +17,8 @@ export default function GroupList() {
     });
   }, []);
 
-  const createGroup = (group: Omit<GroupInterface, "id">) => {
-    axios
-      .post<GroupInterface>("/api/v1/group", group)
-      .then((response) => setGroups((groups) => [response.data, ...groups]));
-  };
+  const addGroup = (group: GroupInterface) =>
+    setGroups((groups) => [group, ...groups]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -47,10 +42,7 @@ export default function GroupList() {
         ))}
       </div>
       {isModalOpen && (
-        <GroupForm
-          onSubmit={createGroup}
-          onClose={() => setIsModalOpen(false)}
-        />
+        <GroupForm onSubmit={addGroup} onClose={() => setIsModalOpen(false)} />
       )}
     </div>
   );

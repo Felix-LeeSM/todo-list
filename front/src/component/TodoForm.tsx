@@ -3,6 +3,8 @@ import { PlusCircle } from "lucide-react";
 import { TodoInterface } from "../type/Todo.interface";
 import axios from "axios";
 import { GroupContext } from "../context/group/GroupContext";
+import { ErrorInterface } from "../type/Error.interface";
+import { toast } from "react-toastify";
 
 export type TodoFormProps = {
   onSubmit: (todo: TodoInterface) => void;
@@ -23,8 +25,12 @@ export default function TodoForm({ onSubmit }: TodoFormProps) {
       })
       .then((res) => onSubmit(res.data))
       .then(() => setTitle(""))
-      .then(() => setDescription(""))
-      .catch(() => {});
+      .catch(
+        (err) =>
+          axios.isAxiosError<ErrorInterface>(err) &&
+          err.response &&
+          toast.error(err.response.data.message)
+      );
   };
 
   return (

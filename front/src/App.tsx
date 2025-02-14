@@ -9,10 +9,19 @@ import { Home } from "./page/Home";
 import { Todo } from "./page/Todo";
 import { GroupProvider } from "./context/group/GroupProvider";
 import { GroupRoute } from "./route/GroupRoute";
+import { Flip, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        newestOnTop={true}
+        closeOnClick
+        transition={Flip}
+      />
       <AuthProvider>
         <BrowserRouter>
           <Routes>

@@ -6,6 +6,8 @@ import TodoForm from "./TodoForm";
 import { TodoList } from "./TodoList";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { TodoStatus } from "../type/TodoStatus";
+import { ErrorInterface } from "../type/Error.interface";
+import { toast } from "react-toastify";
 
 interface TodoManagerProps {
   group: GroupInterface;
@@ -37,7 +39,6 @@ export default function TodoManager({ group }: TodoManagerProps) {
     if (source.droppableId === destination.droppableId) return;
 
     const todo = todos.find((todo) => todo.id.toString() === draggableId);
-    console.log(todo);
 
     if (!todo) return;
 
@@ -50,6 +51,12 @@ export default function TodoManager({ group }: TodoManagerProps) {
         setTodos((todos) =>
           todos.map((todo) => (todo.id === res.data.id ? res.data : todo))
         )
+      )
+      .catch(
+        (err) =>
+          axios.isAxiosError<ErrorInterface>(err) &&
+          err.response &&
+          toast.error(err.response.data.message)
       );
   };
 

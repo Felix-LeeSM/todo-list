@@ -68,7 +68,7 @@ export default function TodoManager({ group }: TodoManagerProps) {
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">{group.name} - Todos</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
           {(["TO_DO", "IN_PROGRESS", "DONE", "ON_HOLD"] as const).map(
             (status) => (
               <TodoList

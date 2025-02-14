@@ -18,7 +18,7 @@ export function TodoList({ todos, todoStatus, onDelete }: TodoItemProps) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="space-y-2 min-h-32"
+            className="space-y-2 min-h-0"
           >
             {todos.map((todo, index) => (
               <Draggable

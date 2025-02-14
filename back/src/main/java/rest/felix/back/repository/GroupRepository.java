@@ -2,10 +2,9 @@ package rest.felix.back.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import lombok.AllArgsConstructor;
-
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import rest.felix.back.dto.internal.CreateGroupDTO;
 import rest.felix.back.dto.internal.GroupDTO;
@@ -62,10 +61,10 @@ public class GroupRepository {
           """;
 
       return Optional.of(
-          em
-              .createQuery(query, Group.class)
-              .setParameter("groupId", groupId)
-              .getSingleResult())
+              em
+                  .createQuery(query, Group.class)
+                  .setParameter("groupId", groupId)
+                  .getSingleResult())
           .map(group -> new GroupDTO(group.getId(), group.getName(), group.getDescription()));
     } catch (NoResultException e) {
       return Optional.empty();

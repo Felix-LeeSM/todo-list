@@ -35,9 +35,9 @@ import rest.felix.back.security.JwtTokenProvider;
 public class GroupControllerWebTest {
 
   @Autowired
-  private MockMvc mvc;
-  @Autowired
   EntityManager em;
+  @Autowired
+  private MockMvc mvc;
   @Autowired
   private ObjectMapper objectMapper;
   @Autowired

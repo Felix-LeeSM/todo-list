@@ -3,9 +3,8 @@ package rest.felix.back.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
-import lombok.AllArgsConstructor;
-
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import rest.felix.back.dto.internal.SignupDTO;

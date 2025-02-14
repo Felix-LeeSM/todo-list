@@ -2,9 +2,8 @@ package rest.felix.back.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import lombok.AllArgsConstructor;
-
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import rest.felix.back.dto.internal.UserGroupDTO;
 import rest.felix.back.entity.Group;
@@ -21,18 +20,18 @@ public class UserGroupRepository {
   public Optional<UserGroupDTO> getByUserIdAndGroupId(long userId, long groupId) {
     try {
       return Optional.of(
-          em.createQuery("""
-              SELECT
-                  ug
-              FROM
-                  UserGroup ug
-              WHERE
-                  ug.user.id = :userId AND
-                  ug.group.id = :groupId
-              """, UserGroup.class)
-              .setParameter("userId", userId)
-              .setParameter("groupId", groupId)
-              .getSingleResult())
+              em.createQuery("""
+                      SELECT
+                          ug
+                      FROM
+                          UserGroup ug
+                      WHERE
+                          ug.user.id = :userId AND
+                          ug.group.id = :groupId
+                      """, UserGroup.class)
+                  .setParameter("userId", userId)
+                  .setParameter("groupId", groupId)
+                  .getSingleResult())
           .map(userGroup -> new UserGroupDTO(userGroup.getGroupRole(), userId, groupId));
 
     } catch (NoResultException e) {

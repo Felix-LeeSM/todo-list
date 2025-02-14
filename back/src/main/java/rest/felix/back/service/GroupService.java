@@ -1,9 +1,8 @@
 package rest.felix.back.service;
 
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import rest.felix.back.dto.internal.CreateGroupDTO;
 import rest.felix.back.dto.internal.GroupDTO;

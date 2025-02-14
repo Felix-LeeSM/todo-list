@@ -45,9 +45,9 @@ import rest.felix.back.utility.Pair;
 public class TodoControllerWebTest {
 
   @Autowired
-  private MockMvc mvc;
-  @Autowired
   EntityManager em;
+  @Autowired
+  private MockMvc mvc;
   @Autowired
   private ObjectMapper objectMapper;
   @Autowired
@@ -1561,7 +1561,7 @@ public class TodoControllerWebTest {
     em.flush();
 
     em.remove(todo);
-    
+
     em.flush();
 
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(

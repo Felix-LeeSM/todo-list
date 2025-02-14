@@ -5,13 +5,14 @@ import { AuthContext } from "../context/auth/AuthContext";
 import { User, Lock } from "lucide-react";
 import { ErrorInterface } from "../type/Error.interface";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-export function SignInForm(props: {
-  handleSubmit: (e: React.FormEvent) => void;
-}) {
+export function SignInForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { handleSignIn } = useContext(AuthContext);
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +22,9 @@ export function SignInForm(props: {
     axios
       .post<UserInterface>("/api/v1/user/token/access-token", body)
       .then((res) => handleSignIn(res.data))
-      .then(() => props.handleSubmit(e))
       .then(() => setUsername(""))
       .then(() => setPassword(""))
+      .then(() => navigate("/group"))
       .catch(
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&

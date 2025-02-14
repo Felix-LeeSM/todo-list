@@ -42,7 +42,6 @@ public class UserControllerWebTest {
   @Autowired
   private JwtTokenProvider jwtTokenProvider;
 
-
   @Test
   void signUp_HappyPath() throws Exception {
 
@@ -75,7 +74,6 @@ public class UserControllerWebTest {
     result.andExpect(jsonPath("$.username").value("LongEnoughUsername"));
     result.andExpect(jsonPath("$.nickname").value("nickname"));
 
-
   }
 
   @Test
@@ -105,17 +103,14 @@ public class UserControllerWebTest {
           post(path)
               .content(requestBody)
               .contentType(MediaType.APPLICATION_JSON)
-              .accept(MediaType.APPLICATION_JSON)
-      );
+              .accept(MediaType.APPLICATION_JSON));
 
       // Then
 
       result.andExpect(status().isBadRequest());
     }
 
-
   }
-
 
   @Test
   void signUp_Failure_UsernameTooShort() throws Exception {
@@ -125,7 +120,7 @@ public class UserControllerWebTest {
     String path = "/api/v1/user";
 
     SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "user",
+        "u",
         "nickname",
         "LongEnoughPassword",
         "LongEnoughPassword");
@@ -145,7 +140,6 @@ public class UserControllerWebTest {
     // Then
 
     result.andExpect(status().isBadRequest());
-
 
   }
 
@@ -178,7 +172,6 @@ public class UserControllerWebTest {
 
     result.andExpect(status().isBadRequest());
 
-
   }
 
   @Test
@@ -210,7 +203,6 @@ public class UserControllerWebTest {
 
     result.andExpect(status().isBadRequest());
     result.andExpect(jsonPath("$.message").value("password and confirm Password do not match."));
-
 
   }
 
@@ -264,8 +256,7 @@ public class UserControllerWebTest {
         post("/api/v1/user")
             .content(objectMapper.writeValueAsString(signupRequestDTO))
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     String path = "/api/v1/user/token/access-token";
 
@@ -278,8 +269,7 @@ public class UserControllerWebTest {
         post(path)
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -313,8 +303,7 @@ public class UserControllerWebTest {
         post(path)
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -333,8 +322,7 @@ public class UserControllerWebTest {
         post("/api/v1/user")
             .content(objectMapper.writeValueAsString(signupRequestDTO))
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     String path = "/api/v1/user/token/access-token";
 
@@ -347,8 +335,7 @@ public class UserControllerWebTest {
         post(path)
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -367,8 +354,7 @@ public class UserControllerWebTest {
         post("/api/v1/user")
             .content(objectMapper.writeValueAsString(signupRequestDTO))
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     Cookie cookie = new Cookie("accessToken", jwtTokenProvider.generateToken("username123"));
     String path = "/api/v1/user/token";
@@ -377,18 +363,16 @@ public class UserControllerWebTest {
 
     ResultActions result = mvc.perform(
         delete(path)
-            .cookie(cookie)
-    );
+            .cookie(cookie));
 
     // Then
 
     result.andExpect(cookie().exists("accessToken"));
     result.andExpect(mvcResult -> {
-          Cookie accessTokenCookie = mvcResult.getResponse().getCookie("accessToken");
-          Assertions.assertNotNull(accessTokenCookie);
-          Assertions.assertEquals(0, accessTokenCookie.getMaxAge());
-        }
-    );
+      Cookie accessTokenCookie = mvcResult.getResponse().getCookie("accessToken");
+      Assertions.assertNotNull(accessTokenCookie);
+      Assertions.assertEquals(0, accessTokenCookie.getMaxAge());
+    });
   }
 
   @Test
@@ -400,8 +384,7 @@ public class UserControllerWebTest {
     // When
 
     ResultActions result = mvc.perform(
-        delete(path)
-    );
+        delete(path));
 
     // Then
 
@@ -420,8 +403,7 @@ public class UserControllerWebTest {
         post("/api/v1/user")
             .content(objectMapper.writeValueAsString(signupRequestDTO))
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     Cookie cookie = new Cookie("accessToken", jwtTokenProvider.generateToken("username123"));
 
@@ -433,8 +415,7 @@ public class UserControllerWebTest {
         get(path)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
-            .cookie(cookie)
-    );
+            .cookie(cookie));
 
     // Then
 
@@ -456,8 +437,7 @@ public class UserControllerWebTest {
     ResultActions result = mvc.perform(
         get(path)
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-    );
+            .accept(MediaType.APPLICATION_JSON));
 
     // Then
 

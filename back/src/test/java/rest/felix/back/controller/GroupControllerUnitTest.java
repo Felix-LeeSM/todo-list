@@ -22,7 +22,6 @@ import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.entity.enumerated.TodoStatus;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
-import rest.felix.back.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 
 @SpringBootTest
@@ -443,7 +442,6 @@ public class GroupControllerUnitTest {
 
     em.persist(todo);
 
-
     em.flush();
 
     Principal principal = user::getUsername;
@@ -554,13 +552,13 @@ public class GroupControllerUnitTest {
 
       Assertions.assertTrue(
           em.createQuery("""
-                SELECT
-                  g
-                FROM
-                  Group g
-                WHERE
-                  g.id = :groupId
-                """, Group.class)
+                  SELECT
+                    g
+                  FROM
+                    Group g
+                  WHERE
+                    g.id = :groupId
+                  """, Group.class)
               .setParameter("groupId", group.getId())
               .getResultStream()
               .findFirst()
@@ -569,13 +567,13 @@ public class GroupControllerUnitTest {
 
       Assertions.assertTrue(
           em.createQuery("""
-                SELECT
-                  t
-                FROM
-                  Todo t
-                WHERE
-                  t.group.id = :groupId
-                """, Todo.class)
+                  SELECT
+                    t
+                  FROM
+                    Todo t
+                  WHERE
+                    t.group.id = :groupId
+                  """, Todo.class)
               .setParameter("groupId", group.getId())
               .getResultStream()
               .findFirst()
@@ -584,13 +582,13 @@ public class GroupControllerUnitTest {
 
       Assertions.assertTrue(
           em.createQuery("""
-                SELECT
-                  ug
-                FROM
-                  UserGroup ug
-                WHERE
-                  ug.group.id = :groupId
-                """, UserGroup.class)
+                  SELECT
+                    ug
+                  FROM
+                    UserGroup ug
+                  WHERE
+                    ug.group.id = :groupId
+                  """, UserGroup.class)
               .setParameter("groupId", group.getId())
               .getResultStream()
               .findFirst()

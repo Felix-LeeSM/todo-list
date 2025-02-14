@@ -55,12 +55,12 @@ public class UserGroupRepository {
 
   public void deleteByGroupId(long groupId) {
     em.createQuery("""
-        DELETE
-        FROM
-          UserGroup ug
-        WHERE
-          ug.group.id = :groupId
-        """)
+            DELETE
+            FROM
+              UserGroup ug
+            WHERE
+              ug.group.id = :groupId
+            """)
         .setParameter("groupId", groupId)
         .executeUpdate();
   }

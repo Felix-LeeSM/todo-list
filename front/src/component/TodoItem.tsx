@@ -5,13 +5,15 @@ import {
   Clock,
   PlayCircle,
   GripVertical,
+  X,
 } from "lucide-react";
 
 interface TodoItemProps {
   todo: TodoInterface;
+  onDelete: (todo: TodoInterface) => void;
 }
 
-export default function TodoItem({ todo }: TodoItemProps) {
+export default function TodoItem({ todo, onDelete }: TodoItemProps) {
   const statusColors = {
     TO_DO: "bg-yellow-100 border-yellow-300",
     IN_PROGRESS: "bg-orange-100 border-orange-300",
@@ -39,7 +41,18 @@ export default function TodoItem({ todo }: TodoItemProps) {
         <h3 className="font-medium truncate">{todo.title}</h3>
         <p className="text-sm text-gray-600 mt-1">{todo.description}</p>
       </div>
-      {statusIcons[todo.status]}
+      <div className="flex flex-col self-stretch">
+        <button
+          type="button"
+          className="self-start"
+          onClick={() => onDelete(todo)}
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="flex-1 flex items-center justify-center">
+          {statusIcons[todo.status]}
+        </div>
+      </div>
     </div>
   );
 }

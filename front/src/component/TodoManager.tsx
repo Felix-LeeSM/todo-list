@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import type { GroupInterface } from "../type/Group.interface";
 import type { TodoInterface } from "../type/Todo.interface";
@@ -11,6 +11,12 @@ interface TodoManagerProps {
 
 export default function TodoManager({ group }: TodoManagerProps) {
   const [todos, setTodos] = useState<TodoInterface[]>([]);
+
+  const deleteTodo = (todo: TodoInterface) => {
+    axios
+      .delete(`/api/v1/group/${group.id}/todo/${todo.id}`)
+      .then(() => setTodos((todos) => todos.filter((t) => t.id !== todo.id)));
+  };
 
   useEffect(() => {
     axios.get<TodoInterface[]>(`/api/v1/group/${group.id}/todo`).then((res) => {
@@ -27,8 +33,10 @@ export default function TodoManager({ group }: TodoManagerProps) {
         {(["TO_DO", "IN_PROGRESS", "DONE", "ON_HOLD"] as const).map(
           (status) => (
             <TodoList
+              key={`list-${status}`}
               todoStatus={status}
               todos={todos.filter((todo) => todo.status === status)}
+              onDelete={deleteTodo}
             />
           )
         )}

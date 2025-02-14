@@ -9,20 +9,20 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SignupRequestDTO {
 
-    @NotNull
-    @Size(min = 10, max = 50)
-    private String username;
+  @NotNull
+  @Size(min = 10, max = 50)
+  private String username;
 
-    @NotNull
-    @Size(min = 5, max = 100)
-    private String nickname;
+  @NotNull
+  @Size(min = 5, max = 100)
+  private String nickname;
 
-    @NotNull
-    @Size(min = 15, max = 100)
-    private String password;
+  @NotNull
+  @Size(min = 15, max = 100)
+  private String password;
 
-    @NotNull
-    @Size(min = 15, max = 100)
-    private String confirmPassword;
+  @NotNull
+  @Size(min = 15, max = 100)
+  private String confirmPassword;
 
 }

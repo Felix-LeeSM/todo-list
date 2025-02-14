@@ -2,8 +2,8 @@ package rest.felix.back.exception.throwable;
 
 public interface RequestExceptionInterface {
 
-    public int getStatusCode();
+  int getStatusCode();
 
-    public String getMessage();
+  String getMessage();
 
 }

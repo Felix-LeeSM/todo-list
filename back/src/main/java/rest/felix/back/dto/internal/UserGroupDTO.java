@@ -8,7 +8,8 @@ import rest.felix.back.entity.enumerated.GroupRole;
 @Getter
 @AllArgsConstructor
 public class UserGroupDTO {
-    private final GroupRole groupRole;
-    private final long userId;
-    private final long groupId;
+
+  private final GroupRole groupRole;
+  private final long userId;
+  private final long groupId;
 }

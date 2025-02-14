@@ -7,9 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserDTO {
 
-    private final Long id;
-    private final String nickname;
-    private final String username;
-    private final String hashedPassword;
+  private final Long id;
+  private final String nickname;
+  private final String username;
+  private final String hashedPassword;
 
 }

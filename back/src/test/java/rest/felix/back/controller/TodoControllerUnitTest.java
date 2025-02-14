@@ -2,13 +2,18 @@ package rest.felix.back.controller;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import rest.felix.back.dto.internal.TodoDTO;
 import rest.felix.back.dto.request.CreateTodoRequestDTO;
+import rest.felix.back.dto.request.UpdateTodoRequestDTO;
 import rest.felix.back.dto.response.TodoResponseDTO;
 import rest.felix.back.entity.Group;
 import rest.felix.back.entity.Todo;
@@ -17,508 +22,1292 @@ import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.entity.enumerated.TodoStatus;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
+import rest.felix.back.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 import rest.felix.back.utility.Pair;
-
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
 
 @SpringBootTest
 @Transactional
 public class TodoControllerUnitTest {
 
-    @Autowired
-    private EntityManager em;
-    @Autowired
-    private TodoController todoController;
-
-    @Test
-    void getTodos_HappyPath() {
-        // Given
-
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-
-        em.persist(user);
-
-
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
-
-        em.persist(group);
-
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
-
-        em.persist(userGroup);
-
-        List<Pair<TodoStatus, Integer>> list = Arrays.asList(
-                new Pair<>(TodoStatus.TO_DO, 1),
-                new Pair<>(TodoStatus.IN_PROGRESS, 2),
-                new Pair<>(TodoStatus.DONE, 3),
-                new Pair<>(TodoStatus.ON_HOLD, 4)
-        );
-
-        list.forEach(pair -> {
-            TodoStatus todoStatus = pair.first();
-            int idx = pair.second();
-
-            Todo todo = new Todo();
-            todo.setTitle(String.format("todo %d", idx));
-            todo.setDescription(String.format("todo %d description", idx));
-            todo.setTodoStatus(todoStatus);
-            todo.setAuthor(user);
-            todo.setGroup(group);
-            em.persist(todo);
-        });
+  @Autowired
+  private EntityManager em;
+  @Autowired
+  private TodoController todoController;
+
+  @Test
+  void getTodos_HappyPath() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    List<Pair<TodoStatus, Integer>> list = Arrays.asList(
+        new Pair<>(TodoStatus.TO_DO, 1),
+        new Pair<>(TodoStatus.IN_PROGRESS, 2),
+        new Pair<>(TodoStatus.DONE, 3),
+        new Pair<>(TodoStatus.ON_HOLD, 4));
+
+    list.forEach(pair -> {
+      TodoStatus todoStatus = pair.first();
+      int idx = pair.second();
+
+      Todo todo = new Todo();
+      todo.setTitle(String.format("todo %d", idx));
+      todo.setDescription(String.format("todo %d description", idx));
+      todo.setTodoStatus(todoStatus);
+      todo.setAuthor(user);
+      todo.setGroup(group);
+      em.persist(todo);
+    });
 
-        em.flush();
+    em.flush();
 
-        Principal principal = user::getUsername;
+    Principal principal = user::getUsername;
 
-        // When
+    // When
 
-        ResponseEntity<List<TodoResponseDTO>> responseEntity = todoController.getTodos(principal, group.getId());
+    ResponseEntity<List<TodoResponseDTO>> responseEntity = todoController.getTodos(principal,
+        group.getId());
 
-        // Then
+    // Then
 
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        List<TodoResponseDTO> todoResponseDTOs = responseEntity.getBody();
-        Assertions.assertEquals(4, todoResponseDTOs.size());
-        Assertions.assertTrue(
-                todoResponseDTOs
-                        .stream()
-                        .map(TodoResponseDTO::authorId)
-                        .map(authorId -> authorId.equals(user.getId()))
-                        .reduce(true, (one, another) -> one && another)
-        );
+    List<TodoResponseDTO> todoResponseDTOs = responseEntity.getBody();
+    Assertions.assertEquals(4, todoResponseDTOs.size());
+    Assertions.assertTrue(
+        todoResponseDTOs
+            .stream()
+            .map(TodoResponseDTO::authorId)
+            .map(authorId -> authorId.equals(user.getId()))
+            .reduce(true, (one, another) -> one && another));
 
-        Assertions.assertTrue(
-                todoResponseDTOs
-                        .stream()
-                        .map(TodoResponseDTO::groupId)
-                        .map(groupId -> groupId.equals(group.getId()))
-                        .reduce(true, (one, another) -> one && another)
-        );
+    Assertions.assertTrue(
+        todoResponseDTOs
+            .stream()
+            .map(TodoResponseDTO::groupId)
+            .map(groupId -> groupId.equals(group.getId()))
+            .reduce(true, (one, another) -> one && another));
 
-        Assertions.assertTrue(
-                todoResponseDTOs
-                .stream()
-                .map(TodoResponseDTO::title)
-                .toList()
-                .containsAll(
-                        List.of("todo 1", "todo 2", "todo 3", "todo 4")
-                )
-        );
+    Assertions.assertTrue(
+        todoResponseDTOs
+            .stream()
+            .map(TodoResponseDTO::title)
+            .toList()
+            .containsAll(
+                List.of("todo 1", "todo 2", "todo 3", "todo 4")));
 
-        Assertions.assertTrue(
-                todoResponseDTOs
-                        .stream()
-                        .map(TodoResponseDTO::description)
-                        .toList()
-                        .containsAll(
-                                List.of("todo 1 description", "todo 2 description", "todo 3 description", "todo 4 description")
-                        )
-        );
+    Assertions.assertTrue(
+        todoResponseDTOs
+            .stream()
+            .map(TodoResponseDTO::description)
+            .toList()
+            .containsAll(
+                List.of("todo 1 description", "todo 2 description", "todo 3 description",
+                    "todo 4 description")));
 
-        Assertions.assertTrue(
-                todoResponseDTOs
-                        .stream()
-                        .map(TodoResponseDTO::status)
-                        .toList()
-                        .containsAll(
-                                List.of(TodoStatus.PENDING, TodoStatus.ACTIVE, TodoStatus.IMMINENT, TodoStatus.DONE)
-                        )
-        );
+    Assertions.assertTrue(
+        todoResponseDTOs
+            .stream()
+            .map(TodoResponseDTO::status)
+            .toList()
+            .containsAll(
+                List.of(TodoStatus.TO_DO, TodoStatus.IN_PROGRESS, TodoStatus.DONE,
+                    TodoStatus.ON_HOLD)));
 
-    }
+  }
 
-    @Test
-    void getTodos_HappyPath_NoTodo() {
-        // Given
+  @Test
+  void getTodos_HappyPath_NoTodo() {
+    // Given
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        em.persist(user);
+    em.persist(user);
 
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    em.persist(group);
 
-        em.persist(group);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    em.persist(userGroup);
 
-        em.persist(userGroup);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    ResponseEntity<List<TodoResponseDTO>> responseEntity = todoController.getTodos(principal,
+        group.getId());
 
-        ResponseEntity<List<TodoResponseDTO>> responseEntity = todoController.getTodos(principal, group.getId());
+    // Then
 
-        // Then
+    Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    List<TodoResponseDTO> todoResponseDTOs = responseEntity.getBody();
+    Assertions.assertEquals(0, todoResponseDTOs.size());
 
-        List<TodoResponseDTO> todoResponseDTOs = responseEntity.getBody();
-        Assertions.assertEquals(0, todoResponseDTOs.size());
+  }
 
-    }
+  @Test
+  void getTodos_Failure_NoUser() {
+    // Given
 
-    @Test
-    void getTodos_Failure_NoUser() {
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    em.persist(user);
 
-        em.persist(user);
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    em.flush();
 
-        em.persist(group);
+    em.remove(user);
 
-        em.flush();
+    em.flush();
 
-        em.remove(user);
-        
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    Runnable lambda = () -> todoController.getTodos(principal, group.getId());
 
-        Runnable lambda = () -> todoController.getTodos(principal, group.getId());
+    // Then
 
-        // Then
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
 
-        Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+  }
 
-    }
+  @Test
+  void getTodos_Failure_Group() {
+    // Given
 
-    @Test
-    void getTodos_Failure_Group() {
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    em.persist(user);
 
-        em.persist(user);
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        em.persist(group);
+    em.persist(userGroup);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    em.flush();
 
-        em.persist(userGroup);
+    em.remove(userGroup);
+    em.remove(group);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        em.remove(userGroup);
-        em.remove(group);
-        em.flush();
+    // When
 
-        Principal principal = user::getUsername;
+    Runnable lambda = () -> todoController.getTodos(principal, group.getId());
 
-        // When
+    // Then
 
-        Runnable lambda = () -> todoController.getTodos(principal, group.getId());
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
 
-        // Then
+  }
 
-        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  @Test
+  void getTodos_Failure_NoUserGroup() {
+    // Given
 
-    }
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-    @Test
-    void getTodos_Failure_NoUserGroup() {
-        // Given
+    em.persist(user);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-        em.persist(user);
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        em.persist(group);
+    em.persist(userGroup);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    em.flush();
 
-        em.persist(userGroup);
+    em.remove(userGroup);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        em.remove(userGroup);
-        em.flush();
+    // When
 
-        Principal principal = user::getUsername;
+    Runnable lambda = () -> todoController.getTodos(principal, group.getId());
 
-        // When
+    // Then
 
-        Runnable lambda = () -> todoController.getTodos(principal, group.getId());
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
 
-        // Then
+  }
 
-        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  @Test
+  void createTodo_HappyPath() {
+    // Given
 
-    }
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
+    em.persist(user);
 
-    @Test
-    void createTodo_HappyPath() {
-        // Given
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    em.persist(group);
 
-        em.persist(user);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    em.persist(userGroup);
 
-        em.persist(group);
+    em.flush();
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    Principal principal = user::getUsername;
 
-        em.persist(userGroup);
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description");
 
-        em.flush();
+    // When
 
-        Principal principal = user::getUsername;
+    ResponseEntity<TodoResponseDTO> responseEntity = todoController.createTodo(principal,
+        group.getId(), createTodoRequestDTO);
 
-        CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title", "todo description");
+    // Then
 
-        // When
+    Assertions.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 
-        ResponseEntity<TodoResponseDTO> responseEntity = todoController.createTodo(principal, group.getId(), createTodoRequestDTO);
+    TodoResponseDTO todoResponseDTO = responseEntity.getBody();
 
-        // Then
+    Assertions.assertEquals("todo title", todoResponseDTO.title());
+    Assertions.assertEquals("todo description", todoResponseDTO.description());
+    Assertions.assertEquals(TodoStatus.TO_DO, todoResponseDTO.status());
+    Assertions.assertEquals(user.getId(), todoResponseDTO.authorId());
+    Assertions.assertEquals(group.getId(), todoResponseDTO.groupId());
+  }
 
-        Assertions.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+  @Test
+  void createTodo_Failure_NoAuthority() {
+    // Given
 
-        TodoResponseDTO todoResponseDTO = responseEntity.getBody();
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        Assertions.assertEquals("todo title", todoResponseDTO.title());
-        Assertions.assertEquals("todo description", todoResponseDTO.description());
-        Assertions.assertEquals(TodoStatus.PENDING, todoResponseDTO.status());
-        Assertions.assertEquals(user.getId(), todoResponseDTO.authorId());
-        Assertions.assertEquals(group.getId(), todoResponseDTO.groupId());
-    }
+    em.persist(user);
 
-    @Test
-    void createTodo_Failure_NoAuthority() {
-        // Given
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    em.persist(group);
 
-        em.persist(user);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.VIEWER);
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    em.persist(userGroup);
 
-        em.persist(group);
+    em.flush();
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.VIEWER);
+    Principal principal = user::getUsername;
 
-        em.persist(userGroup);
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description");
 
-        em.flush();
+    // When
 
-        Principal principal = user::getUsername;
+    Runnable lambda = () -> todoController.createTodo(principal, group.getId(),
+        createTodoRequestDTO);
 
-        CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title", "todo description");
+    // Then
 
-        // When
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
 
-        Runnable lambda = () -> todoController.createTodo(principal, group.getId(), createTodoRequestDTO);
+  @Test
+  void createTodo_Failure_NoUser() {
+    // Given
 
-        // Then
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
+    em.persist(user);
 
-        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
-    }
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-    @Test
-    void createTodo_Failure_NoUser() {
-        // Given
+    em.persist(group);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        em.persist(user);
+    em.persist(userGroup);
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    em.flush();
 
-        em.persist(group);
+    em.remove(userGroup);
+    em.remove(user);
+    em.flush();
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    Principal principal = user::getUsername;
 
-        em.persist(userGroup);
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description");
 
-        em.flush();
+    // When
 
-        em.remove(userGroup);
-        em.remove(user);
-        em.flush();
+    Runnable lambda = () -> todoController.createTodo(principal, group.getId(),
+        createTodoRequestDTO);
 
-        Principal principal = user::getUsername;
+    // Then
 
-        CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title", "todo description");
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+  }
 
-        // When
+  @Test
+  void createTodo_Failure_NoGroup() {
+    // Given
 
-        Runnable lambda = () -> todoController.createTodo(principal, group.getId(), createTodoRequestDTO);
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        // Then
+    em.persist(user);
 
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-        Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
-    }
+    em.persist(group);
 
-    @Test
-    void createTodo_Failure_NoGroup() {
-        // Given
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    em.persist(userGroup);
 
-        em.persist(user);
+    em.flush();
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    em.remove(userGroup);
+    em.remove(group);
+    em.flush();
 
-        em.persist(group);
+    Principal principal = user::getUsername;
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description");
 
-        em.persist(userGroup);
+    // When
 
-        em.flush();
+    Runnable lambda = () -> todoController.createTodo(principal, group.getId(),
+        createTodoRequestDTO);
 
-        em.remove(userGroup);
-        em.remove(group);
-        em.flush();
+    // Then
 
-        Principal principal = user::getUsername;
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
 
-        CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title", "todo description");
+  @Test
+  void createTodo_Failure_NoUserGroup() {
+    // Given
 
-        // When
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        Runnable lambda = () -> todoController.createTodo(principal, group.getId(), createTodoRequestDTO);
+    em.persist(user);
 
-        // Then
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
+    em.persist(group);
 
-        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
-    }
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-    @Test
-    void createTodo_Failure_NoUserGroup() {
-        // Given
+    em.persist(userGroup);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
+    em.flush();
 
-        em.persist(user);
+    em.remove(userGroup);
+    em.flush();
 
-        Group group = new Group();
-        group.setName("group");
-        group.setDescription("description");
+    Principal principal = user::getUsername;
 
-        em.persist(group);
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description");
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        userGroup.setGroupRole(GroupRole.OWNER);
+    // When
 
-        em.persist(userGroup);
+    Runnable lambda = () -> todoController.createTodo(principal, group.getId(),
+        createTodoRequestDTO);
 
-        em.flush();
+    // Then
 
-        em.remove(userGroup);
-        em.flush();
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
 
-        Principal principal = user::getUsername;
+  @Test
+  void deleteTodo_HappyPath() {
+    // Given
 
-        CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title", "todo description");
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
 
-        // When
+    em.persist(user);
 
-        Runnable lambda = () -> todoController.createTodo(principal, group.getId(), createTodoRequestDTO);
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
 
-        // Then
+    em.persist(group);
 
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
 
-        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
-    }
+    em.persist(userGroup);
 
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    ResponseEntity<Void> responseEntity = todoController.deleteTodo(principal, group.getId(),
+        todo.getId());
+
+    // Then
+
+    Assertions.assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  t
+                FROM
+                  Todo t
+                WHERE
+                  t.id = :todoId
+                """, Todo.class)
+            .setParameter("todoId", todo.getId())
+            .getResultStream()
+            .findFirst()
+            .isEmpty()
+    );
+  }
+
+  @Test
+  void deleteTodo_Failure_NoUser() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(todo);
+    em.remove(userGroup);
+    em.remove(user);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.deleteTodo(principal, group.getId(), todo.getId());
+
+    // Then
+
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+
+  }
+
+  @Test
+  void deleteTodo_Failure_NoGroupUser() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(userGroup);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.deleteTodo(principal, group.getId(), todo.getId());
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void deleteTodo_Failure_ImproperGroupRole1() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.VIEWER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.deleteTodo(principal, group.getId(), todo.getId());
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void deleteTodo_Failure_ImproperGroupRole2() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    User author = new User();
+    author.setUsername("username_author");
+    author.setNickname("nickname_author");
+    author.setHashedPassword("hashedPassword");
+
+    em.persist(author);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.MEMBER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(author);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    Principal principal = author::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.deleteTodo(principal, group.getId(), todo.getId());
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void deleteTodo_Failure_NoGroup() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(todo);
+    em.remove(group);
+    em.remove(userGroup);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.deleteTodo(principal, group.getId(), todo.getId());
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void deleteTodo_Failure_NoTodo() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(todo);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.deleteTodo(principal, group.getId(), todo.getId());
+
+    // Then
+
+    Assertions.assertThrows(ResourceNotFoundException.class, lambda::run);
+  }
+
+  @Test
+  void updateTodo_HappyPath() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    ResponseEntity<TodoDTO> responseEntity = todoController.updateTodo(principal, group.getId(),
+        todo.getId(), updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+    TodoDTO todoDTO = responseEntity.getBody();
+
+    Assertions.assertEquals(user.getId(), todoDTO.getAuthorId());
+    Assertions.assertEquals(group.getId(), todoDTO.getGroupId());
+    Assertions.assertEquals("updated todo title", todoDTO.getTitle());
+    Assertions.assertEquals("updated todo description", todoDTO.getDescription());
+    Assertions.assertEquals(TodoStatus.DONE, todoDTO.getStatus());
+
+    Todo updatedTodo = em
+        .createQuery("""
+            SELECT
+              t
+            FROM
+              Todo t
+            WHERE
+              t.id = :todoId
+            """, Todo.class)
+        .setParameter("todoId", todo.getId())
+        .getSingleResult();
+
+    Assertions.assertEquals(updatedTodo.getId(), updatedTodo.getId());
+    Assertions.assertEquals(user.getId(), updatedTodo.getAuthor().getId());
+    Assertions.assertEquals(group.getId(), updatedTodo.getGroup().getId());
+    Assertions.assertEquals("updated todo title", updatedTodo.getTitle());
+    Assertions.assertEquals("updated todo description", updatedTodo.getDescription());
+    Assertions.assertEquals(TodoStatus.DONE, updatedTodo.getTodoStatus());
+  }
+
+  @Test
+  void updateTodo_Failure_NoUser() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(todo);
+    em.remove(userGroup);
+    em.remove(user);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+
+  }
+
+  @Test
+  void updateTodo_Failure_NoUserGroup() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(userGroup);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void updateTodo_Failure_ImproperGroupRole1() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.VIEWER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void updateTodo_Failure_ImproperGroupRole2() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    User author = new User();
+    author.setUsername("username_author");
+    author.setNickname("nickname_author");
+    author.setHashedPassword("hashedPassword");
+
+    em.persist(author);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.MEMBER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(author);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void updateTodo_Failure_NoGroup() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(todo);
+    em.remove(userGroup);
+    em.remove(group);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void updateTodo_Failure_NoTodo() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+    em.flush();
+
+    em.remove(todo);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE
+    );
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(ResourceNotFoundException.class, lambda::run);
+  }
 }

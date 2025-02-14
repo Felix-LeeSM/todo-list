@@ -8,10 +8,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class SignInRequestDTO {
-    @NotNull
-    private String username;
 
-    @NotNull
-    private String password;
+  @NotNull
+  private String username;
+
+  @NotNull
+  private String password;
 
 }

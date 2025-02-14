@@ -8,27 +8,27 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class JwtTokenProviderTest {
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+  @Autowired
+  private JwtTokenProvider jwtTokenProvider;
 
-    @Test
-    void generateParseValidate() {
-        // Given
+  @Test
+  void generateParseValidate() {
+    // Given
 
-        String username = "randomUsernameForTest";
-        String token = jwtTokenProvider.generateToken(username);
+    String username = "randomUsernameForTest";
+    String token = jwtTokenProvider.generateToken(username);
 
-        // When
+    // When
 
-        Assertions.assertDoesNotThrow(() -> {
-            jwtTokenProvider.validateToken(token);
-        });
+    Assertions.assertDoesNotThrow(() -> {
+      jwtTokenProvider.validateToken(token);
+    });
 
-        // Then
+    // Then
 
-        Assertions.assertNotEquals(username, token);
-        Assertions.assertEquals(username, jwtTokenProvider.getUsernameFromToken(token));
+    Assertions.assertNotEquals(username, token);
+    Assertions.assertEquals(username, jwtTokenProvider.getUsernameFromToken(token));
 
 
-    }
+  }
 }

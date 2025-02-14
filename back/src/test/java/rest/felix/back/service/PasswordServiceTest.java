@@ -13,21 +13,21 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class PasswordServiceTest {
 
-    @Autowired
-    private PasswordService passwordService;
+  @Autowired
+  private PasswordService passwordService;
 
-    @Test
-    void verifyPassword_HappyPath() {
+  @Test
+  void verifyPassword_HappyPath() {
 
-        // Given
+    // Given
 
-        String rawPassword = "password";
-        String hashedPassword = passwordService.hashPassword("password");
+    String rawPassword = "password";
+    String hashedPassword = passwordService.hashPassword("password");
 
-        // When
+    // When
 
-        Assertions.assertTrue(passwordService.verifyPassword(rawPassword, hashedPassword));
-        Assertions.assertFalse(passwordService.verifyPassword("wrongPassword", hashedPassword));
+    Assertions.assertTrue(passwordService.verifyPassword(rawPassword, hashedPassword));
+    Assertions.assertFalse(passwordService.verifyPassword("wrongPassword", hashedPassword));
 
-    }
+  }
 }

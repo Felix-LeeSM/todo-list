@@ -2,6 +2,9 @@ package rest.felix.back.controller;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,394 +19,395 @@ import rest.felix.back.entity.User;
 import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
-import rest.felix.back.exception.throwable.notfound.GroupNotFoundException;
+import rest.felix.back.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
-
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
 
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
 public class GroupControllerUnitTest {
 
-    @Autowired
-    private GroupController groupController;
-    @Autowired
-    private EntityManager em;
+  @Autowired
+  private GroupController groupController;
+  @Autowired
+  private EntityManager em;
 
-    @Test
-    public void createGroup_HappyPath() {
-        // Given
+  @Test
+  public void createGroup_HappyPath() {
+    // Given
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
-        em.flush();
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+    em.flush();
 
-        Principal principal = user::getUsername;
+    Principal principal = user::getUsername;
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
+    CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName",
+        "group description");
 
-        // When
+    // When
 
-        ResponseEntity<GroupResponseDTO> responseEntity = groupController.createGroup(principal, createGroupRequestDTO);
+    ResponseEntity<GroupResponseDTO> responseEntity = groupController.createGroup(principal,
+        createGroupRequestDTO);
 
-        // Then
+    // Then
 
-        Assertions.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+    Assertions.assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
 
-        GroupResponseDTO groupResponseDTO = responseEntity.getBody();
+    GroupResponseDTO groupResponseDTO = responseEntity.getBody();
 
-        Group createdGroup = em.createQuery("""
-                        SELECT
-                            g
-                        FROM
-                            Group g
-                        WHERE
-                            g.id = :groupId
-                        
-                        """, Group.class)
-                .setParameter("groupId", groupResponseDTO.id())
-                .getSingleResult();
+    Group createdGroup = em.createQuery("""
+            SELECT
+                g
+            FROM
+                Group g
+            WHERE
+                g.id = :groupId
+            
+            """, Group.class)
+        .setParameter("groupId", groupResponseDTO.id())
+        .getSingleResult();
 
-        Assertions.assertEquals("groupName", createdGroup.getName());
-        Assertions.assertEquals("group description", createdGroup.getDescription());
+    Assertions.assertEquals("groupName", createdGroup.getName());
+    Assertions.assertEquals("group description", createdGroup.getDescription());
 
-        UserGroup userGroup = em.createQuery("""
-                        SELECT
-                            ug
-                        FROM
-                            UserGroup ug
-                        WHERE
-                            ug.group.id = :groupId AND
-                            ug.user.id = :userId
-                        """, UserGroup.class)
-                .setParameter("groupId", groupResponseDTO.id())
-                .setParameter("userId", user.getId())
-                .getSingleResult();
+    UserGroup userGroup = em.createQuery("""
+            SELECT
+                ug
+            FROM
+                UserGroup ug
+            WHERE
+                ug.group.id = :groupId AND
+                ug.user.id = :userId
+            """, UserGroup.class)
+        .setParameter("groupId", groupResponseDTO.id())
+        .setParameter("userId", user.getId())
+        .getSingleResult();
 
-        Assertions.assertEquals(GroupRole.OWNER, userGroup.getGroupRole());
+    Assertions.assertEquals(GroupRole.OWNER, userGroup.getGroupRole());
 
 
-    }
+  }
 
-    @Test
-    public void createGroup_Failure_NoSuchUser() {
-        // Given
+  @Test
+  public void createGroup_Failure_NoSuchUser() {
+    // Given
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
-        em.flush();
-        em.remove(user);
-        em.flush();
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+    em.flush();
+    em.remove(user);
+    em.flush();
 
-        Principal principal = user::getUsername;
+    Principal principal = user::getUsername;
 
-        CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName", "group description");
+    CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName",
+        "group description");
 
-        // When
+    // When
 
-        Runnable lambda = () -> groupController.createGroup(principal, createGroupRequestDTO);
+    Runnable lambda = () -> groupController.createGroup(principal, createGroupRequestDTO);
 
-        // Then
+    // Then
 
-        Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
 
 
-    }
+  }
 
 
-    @Test
-    public void getUserGroups_HappyPath() {
-        // Given
+  @Test
+  public void getUserGroups_HappyPath() {
+    // Given
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
-        em.flush();
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+    em.flush();
 
-        Principal principal = user::getUsername;
+    Principal principal = user::getUsername;
 
-        Arrays.stream(new int[]{1, 2, 3})
-                .forEach(idx -> {
-                    String groupName = String.format("group %d", idx);
-                    String groupDescription = String.format("group description %d", idx);
-                    groupController.createGroup(user::getUsername, new CreateGroupRequestDTO(groupName, groupDescription));
-                });
+    Arrays.stream(new int[]{1, 2, 3})
+        .forEach(idx -> {
+          String groupName = String.format("group %d", idx);
+          String groupDescription = String.format("group description %d", idx);
+          groupController.createGroup(user::getUsername,
+              new CreateGroupRequestDTO(groupName, groupDescription));
+        });
 
-        // When
+    // When
 
-        ResponseEntity<List<GroupResponseDTO>> responseEntity =
-                groupController.getUserGroups(principal);
+    ResponseEntity<List<GroupResponseDTO>> responseEntity =
+        groupController.getUserGroups(principal);
 
-        // Then
+    // Then
 
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        List<GroupResponseDTO> groupResponseDTOS = responseEntity.getBody();
+    List<GroupResponseDTO> groupResponseDTOS = responseEntity.getBody();
 
-        Assertions.assertEquals(3, groupResponseDTOS.size());
+    Assertions.assertEquals(3, groupResponseDTOS.size());
 
-        Assertions.assertTrue(
-                groupResponseDTOS
-                        .stream()
-                        .map(GroupResponseDTO::name)
-                        .toList()
-                        .containsAll(
-                                List.of("group 1", "group 2", "group 3")
-                        )
+    Assertions.assertTrue(
+        groupResponseDTOS
+            .stream()
+            .map(GroupResponseDTO::name)
+            .toList()
+            .containsAll(
+                List.of("group 1", "group 2", "group 3")
+            )
 
-        );
+    );
 
-        Assertions.assertTrue(
-                groupResponseDTOS
-                        .stream()
-                        .map(GroupResponseDTO::name)
-                        .toList()
-                        .containsAll(
-                                List.of("group 1", "group 2", "group 3")
-                        )
+    Assertions.assertTrue(
+        groupResponseDTOS
+            .stream()
+            .map(GroupResponseDTO::name)
+            .toList()
+            .containsAll(
+                List.of("group 1", "group 2", "group 3")
+            )
 
-        );        Assertions.assertTrue(
-                groupResponseDTOS
-                        .stream()
-                        .map(GroupResponseDTO::description)
-                        .toList()
-                        .containsAll(
-                                List.of("group description 1", "group description 2", "group description 3")
-                        )
+    );
+    Assertions.assertTrue(
+        groupResponseDTOS
+            .stream()
+            .map(GroupResponseDTO::description)
+            .toList()
+            .containsAll(
+                List.of("group description 1", "group description 2", "group description 3")
+            )
 
-        );
+    );
 
 
-    }
+  }
 
-    @Test
-    public void getUserGroups_HappyPath_NoGroup() {
-        // Given
+  @Test
+  public void getUserGroups_HappyPath_NoGroup() {
+    // Given
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
-        em.flush();
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+    em.flush();
 
-        Principal principal = user::getUsername;
+    Principal principal = user::getUsername;
 
+    // When
 
-        // When
+    ResponseEntity<List<GroupResponseDTO>> responseEntity =
+        groupController.getUserGroups(principal);
 
-        ResponseEntity<List<GroupResponseDTO>> responseEntity =
-                groupController.getUserGroups(principal);
+    // Then
 
-        // Then
+    Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    List<GroupResponseDTO> groupResponseDTOS = responseEntity.getBody();
 
-        List<GroupResponseDTO> groupResponseDTOS = responseEntity.getBody();
+    Assertions.assertEquals(0, groupResponseDTOS.size());
 
-        Assertions.assertEquals(0, groupResponseDTOS.size());
 
+  }
 
-    }
+  @Test
+  public void getUserGroups_Failure_NoSuchUser() {
+    // Given
 
-    @Test
-    public void getUserGroups_Failure_NoSuchUser() {
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+    em.flush();
+    em.remove(user);
+    em.flush();
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
-        em.flush();
-        em.remove(user);
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    Runnable lambda = () -> groupController.getUserGroups(principal);
 
-        Runnable lambda = () -> groupController.getUserGroups(principal);
+    // Then
 
-        // Then
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
 
-        Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+  }
 
-    }
+  @Test
+  public void getUserGroup_HappyPath() {
 
-    @Test
-    public void getUserGroup_HappyPath() {
+    // Given
 
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group name");
-        group.setDescription("group description");
-        em.persist(group);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setGroupRole(GroupRole.OWNER);
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        em.persist(userGroup);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    ResponseEntity<GroupResponseDTO> responseEntity = groupController.getUserGroup(principal,
+        group.getId());
 
-        ResponseEntity<GroupResponseDTO> responseEntity = groupController.getUserGroup(principal, group.getId());
+    // Then
 
-        // Then
+    Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    GroupResponseDTO groupResponseDTO = responseEntity.getBody();
+    Assertions.assertNotNull(groupResponseDTO.id());
+    Assertions.assertEquals("group name", groupResponseDTO.name());
+    Assertions.assertEquals("group description", groupResponseDTO.description());
 
-        GroupResponseDTO groupResponseDTO = responseEntity.getBody();
-        Assertions.assertNotNull(groupResponseDTO.id());
-        Assertions.assertEquals("group name", groupResponseDTO.name());
-        Assertions.assertEquals("group description", groupResponseDTO.description());
+  }
 
-    }
+  @Test
+  public void getUserGroup_NoGroup() {
 
-    @Test
-    public void getUserGroup_NoGroup() {
+    // Given
 
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group name");
-        group.setDescription("group description");
-        em.persist(group);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setGroupRole(GroupRole.OWNER);
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        em.persist(userGroup);
+    em.flush();
 
-        em.flush();
+    em.remove(userGroup);
+    em.remove(group);
 
-        em.remove(userGroup);
-        em.remove(group);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
 
-        Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+    // Then
 
-        // Then
+    Assertions.assertThrows(ResourceNotFoundException.class, lambda::run);
 
-        Assertions.assertThrows(GroupNotFoundException.class, lambda::run);
+  }
 
-    }
+  @Test
+  public void getUserGroup_NoUser() {
 
-    @Test
-    public void getUserGroup_NoUser() {
+    // Given
 
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group name");
-        group.setDescription("group description");
-        em.persist(group);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setGroupRole(GroupRole.OWNER);
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        em.persist(userGroup);
+    em.flush();
 
-        em.flush();
+    em.remove(userGroup);
+    em.remove(user);
 
-        em.remove(userGroup);
-        em.remove(user);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
 
-        Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+    // Then
 
-        // Then
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
 
-        Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+  }
 
-    }
+  @Test
+  public void getUserGroup_NoUserGroup() {
 
-    @Test
-    public void getUserGroup_NoUserGroup() {
+    // Given
 
-        // Given
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
 
-        User user = new User();
-        user.setUsername("username");
-        user.setNickname("nickname");
-        user.setHashedPassword("hashedPassword");
-        em.persist(user);
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
 
-        Group group = new Group();
-        group.setName("group name");
-        group.setDescription("group description");
-        em.persist(group);
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
 
-        UserGroup userGroup = new UserGroup();
-        userGroup.setGroupRole(GroupRole.OWNER);
-        userGroup.setUser(user);
-        userGroup.setGroup(group);
-        em.persist(userGroup);
+    em.flush();
 
-        em.flush();
+    em.remove(userGroup);
 
-        em.remove(userGroup);
+    em.flush();
 
-        em.flush();
+    Principal principal = user::getUsername;
 
-        Principal principal = user::getUsername;
+    // When
 
-        // When
+    Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
 
-        Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+    // Then
 
-        // Then
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
 
-        Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
-
-    }
+  }
 
 
 }

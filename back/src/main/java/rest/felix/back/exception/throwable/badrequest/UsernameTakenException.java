@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class UsernameTakenException extends BadRequestException {
-    public UsernameTakenException() {
-        super("해당 username은 이미 사용 중입니다.");
-    }
+
+  public UsernameTakenException() {
+    super("해당 username은 이미 사용 중입니다.");
+  }
 }

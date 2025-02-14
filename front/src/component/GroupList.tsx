@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { GroupInterface } from "../type/Group.interface";
-import { Plus } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import GroupForm from "./GroupForm";
 import axios from "axios";
 import { GroupCard } from "./GroupCard";
@@ -11,12 +11,22 @@ import { ErrorInterface } from "../type/Error.interface";
 export default function GroupList() {
   const [groups, setGroups] = useState<GroupInterface[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get<GroupInterface[]>("/api/v1/group").then((response) => {
-      setGroups(response.data);
-    });
+    setIsLoading(true);
+    axios
+      .get<GroupInterface[]>("/api/v1/group")
+      .then((response) => setGroups(response.data))
+      .catch(
+        (err) =>
+          axios.isAxiosError<ErrorInterface>(err) &&
+          err.response &&
+          toast.error(err.response.data.message)
+      )
+      .finally(() => setIsLoading(false));
   }, []);
 
   const onSelectGroup = (group: GroupInterface) =>
@@ -50,15 +60,21 @@ export default function GroupList() {
           <span>Add Group</span>
         </button>
       </div>
+      {isLoading && (
+        <div className="w-full h-full flex justify-center items-center">
+          <LoaderCircle className="animate-spin h-10 w-10 mt-20" />
+        </div>
+      )}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {groups.map((group) => (
-          <GroupCard
-            onSelect={onSelectGroup}
-            onDelete={onDeleteGroup}
-            group={group}
-            key={`group-${group.id}`}
-          />
-        ))}
+        {isLoading ||
+          groups.map((group) => (
+            <GroupCard
+              onSelect={onSelectGroup}
+              onDelete={onDeleteGroup}
+              group={group}
+              key={`group-${group.id}`}
+            />
+          ))}
       </div>
       {isModalOpen && (
         <GroupForm onSubmit={addGroup} onClose={() => setIsModalOpen(false)} />

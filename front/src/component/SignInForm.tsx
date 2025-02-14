@@ -3,10 +3,9 @@ import { useContext, useState } from "react";
 import { UserInterface } from "../type/User.interface";
 import { AuthContext } from "../context/auth/AuthContext";
 import { User, Lock, LoaderCircle } from "lucide-react";
-import { ErrorInterface } from "../type/Error.interface";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { LoadingButton } from "./LoadingButton";
+import { handleApiError } from "../util/handleApiError";
 
 export function SignInForm() {
   const [username, setUsername] = useState("");
@@ -30,12 +29,7 @@ export function SignInForm() {
       .then(() => setUsername(""))
       .then(() => setPassword(""))
       .then(() => navigate("/group"))
-      .catch(
-        (err) =>
-          axios.isAxiosError<ErrorInterface>(err) &&
-          err.response &&
-          toast.error(err.response.data.message)
-      )
+      .catch(handleApiError)
       .finally(() => setIsLoading(false));
   };
 

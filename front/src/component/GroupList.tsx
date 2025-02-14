@@ -5,8 +5,7 @@ import GroupForm from "./GroupForm";
 import axios from "axios";
 import { GroupCard } from "./GroupCard";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { ErrorInterface } from "../type/Error.interface";
+import { handleApiError } from "../util/handleApiError";
 
 export default function GroupList() {
   const [groups, setGroups] = useState<GroupInterface[]>([]);
@@ -20,12 +19,7 @@ export default function GroupList() {
     axios
       .get<GroupInterface[]>("/api/v1/group")
       .then((response) => setGroups(response.data))
-      .catch(
-        (err) =>
-          axios.isAxiosError<ErrorInterface>(err) &&
-          err.response &&
-          toast.error(err.response.data.message)
-      )
+      .catch(handleApiError)
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -41,12 +35,7 @@ export default function GroupList() {
       .then(() =>
         setGroups((groups) => groups.filter((g) => g.id !== group.id))
       )
-      .catch(
-        (err) =>
-          axios.isAxiosError<ErrorInterface>(err) &&
-          err.response &&
-          toast.error(err.response.data.message)
-      );
+      .catch(handleApiError);
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mb-6">

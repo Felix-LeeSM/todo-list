@@ -2,9 +2,8 @@ import { useState } from "react";
 import type { GroupInterface } from "../type/Group.interface";
 import { LoaderCircle, X } from "lucide-react";
 import axios from "axios";
-import { toast } from "react-toastify";
-import { ErrorInterface } from "../type/Error.interface";
 import { LoadingButton } from "./LoadingButton";
+import { handleApiError } from "../util/handleApiError";
 
 interface GroupFormProps {
   onSubmit: (group: GroupInterface) => void;
@@ -27,13 +26,7 @@ export default function GroupForm({ onSubmit, onClose }: GroupFormProps) {
       .then(() => onClose())
       .then(() => setName(""))
       .then(() => setDescription(""))
-
-      .catch(
-        (err) =>
-          axios.isAxiosError<ErrorInterface>(err) &&
-          err.response &&
-          toast.error(err.response.data.message)
-      )
+      .catch(handleApiError)
       .finally(() => setIsLoading(false));
   };
 

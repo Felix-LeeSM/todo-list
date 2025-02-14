@@ -6,8 +6,7 @@ import TodoForm from "./TodoForm";
 import { TodoList } from "./TodoList";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { TodoStatus } from "../type/TodoStatus";
-import { ErrorInterface } from "../type/Error.interface";
-import { toast } from "react-toastify";
+import { handleApiError } from "../util/handleApiError";
 
 interface TodoManagerProps {
   group: GroupInterface;
@@ -59,13 +58,10 @@ export default function TodoManager({ group }: TodoManagerProps) {
           todos.map((todo) => (todo.id === res.data.id ? res.data : todo))
         )
       )
-      .catch(
-        (err) =>
-          axios.isAxiosError<ErrorInterface>(err) &&
-          err.response &&
-          toast.error(err.response.data.message) &&
-          setTodos(todos)
-      );
+      .catch((err) => {
+        handleApiError(err);
+        setTodos(todos);
+      });
   };
 
   return (

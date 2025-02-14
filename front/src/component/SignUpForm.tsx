@@ -3,9 +3,8 @@ import { useState } from "react";
 import { UserInterface } from "../type/User.interface";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, IdCard, LoaderCircle } from "lucide-react";
-import { toast } from "react-toastify";
-import { ErrorInterface } from "../type/Error.interface";
 import { LoadingButton } from "./LoadingButton";
+import { handleApiError } from "../util/handleApiError";
 
 export function SignUpForm() {
   const [username, setUsername] = useState("");
@@ -19,6 +18,7 @@ export function SignUpForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     const body = { username, nickname, password, confirmPassword };
     axios
       .post<UserInterface>("/api/v1/user", body)
@@ -28,12 +28,7 @@ export function SignUpForm() {
       .then(() => setPassword(""))
       .then(() => setConfirmPassword(""))
       .then(() => navigate("/signin"))
-      .catch(
-        (err) =>
-          axios.isAxiosError<ErrorInterface>(err) &&
-          err.response &&
-          toast.error(err.response.data.message)
-      )
+      .catch(handleApiError)
       .finally(() => setIsLoading(false));
   };
 

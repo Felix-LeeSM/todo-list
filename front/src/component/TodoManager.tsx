@@ -41,6 +41,14 @@ export default function TodoManager({ group }: TodoManagerProps) {
 
     if (!todo) return;
 
+    setTodos((todos) =>
+      todos.map((todo) =>
+        todo.id.toString() === draggableId
+          ? { ...todo, status: destination.droppableId as TodoStatus }
+          : todo
+      )
+    );
+
     axios
       .put<TodoInterface>(`/api/v1/group/${group.id}/todo/${draggableId}`, {
         ...todo,
@@ -55,7 +63,8 @@ export default function TodoManager({ group }: TodoManagerProps) {
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&
           err.response &&
-          toast.error(err.response.data.message)
+          toast.error(err.response.data.message) &&
+          setTodos(todos)
       );
   };
 

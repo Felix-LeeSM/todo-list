@@ -2,20 +2,25 @@ import axios from "axios";
 import { useContext, useState } from "react";
 import { UserInterface } from "../type/User.interface";
 import { AuthContext } from "../context/auth/AuthContext";
-import { User, Lock } from "lucide-react";
+import { User, Lock, LoaderCircle } from "lucide-react";
 import { ErrorInterface } from "../type/Error.interface";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { LoadingButton } from "./LoadingButton";
 
 export function SignInForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const { handleSignIn } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    setIsLoading(true);
 
     const body = { username, password };
 
@@ -30,7 +35,8 @@ export function SignInForm() {
           axios.isAxiosError<ErrorInterface>(err) &&
           err.response &&
           toast.error(err.response.data.message)
-      );
+      )
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -80,12 +86,21 @@ export function SignInForm() {
       </div>
 
       <div>
-        <button
+        <LoadingButton
+          isLoading={isLoading}
           type="submit"
-          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="py-2 px-4 w-full"
+          childrenWhileLoading={
+            <>
+              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                <LoaderCircle className="animate-spin h-5 w-5" />
+              </span>
+              Signing In...
+            </>
+          }
         >
-          Sign in
-        </button>
+          Sign In
+        </LoadingButton>
       </div>
     </form>
   );

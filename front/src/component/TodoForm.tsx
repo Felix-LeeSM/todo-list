@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
-import { PlusCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { TodoInterface } from "../type/Todo.interface";
 import axios from "axios";
 import { GroupContext } from "../context/group/GroupContext";
 import { ErrorInterface } from "../type/Error.interface";
 import { toast } from "react-toastify";
+import { LoadingButton } from "./LoadingButton";
 
 export type TodoFormProps = {
   onSubmit: (todo: TodoInterface) => void;
@@ -13,10 +14,13 @@ export type TodoFormProps = {
 export default function TodoForm({ onSubmit }: TodoFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { group } = useContext(GroupContext);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    setIsLoading(true);
 
     axios
       .post<TodoInterface>(`/api/v1/group/${group!.id}/todo`, {
@@ -31,7 +35,8 @@ export default function TodoForm({ onSubmit }: TodoFormProps) {
           axios.isAxiosError<ErrorInterface>(err) &&
           err.response &&
           toast.error(err.response.data.message)
-      );
+      )
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -57,13 +62,21 @@ export default function TodoForm({ onSubmit }: TodoFormProps) {
           rows={3}
         />
       </div>
-      <button
+      <LoadingButton
+        isLoading={isLoading}
         type="submit"
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        className="py-2 px-4"
+        childrenWhileLoading={
+          <>
+            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+              <LoaderCircle className="animate-spin h-5 w-5" />
+            </span>
+            Adding Todo...
+          </>
+        }
       >
-        <PlusCircle className="w-5 h-5 mr-2" />
         Add Todo
-      </button>
+      </LoadingButton>
     </form>
   );
 }

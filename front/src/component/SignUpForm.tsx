@@ -2,20 +2,23 @@ import axios from "axios";
 import { useState } from "react";
 import { UserInterface } from "../type/User.interface";
 import { useNavigate } from "react-router-dom";
-import { User, Lock, IdCard } from "lucide-react";
+import { User, Lock, IdCard, LoaderCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import { ErrorInterface } from "../type/Error.interface";
+import { LoadingButton } from "./LoadingButton";
 
 export function SignUpForm() {
   const [username, setUsername] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const body = { username, nickname, password, confirmPassword };
     axios
       .post<UserInterface>("/api/v1/user", body)
@@ -24,12 +27,14 @@ export function SignUpForm() {
       .then(() => setNickname(""))
       .then(() => setPassword(""))
       .then(() => setConfirmPassword(""))
+      .then(() => navigate("/signin"))
       .catch(
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&
           err.response &&
           toast.error(err.response.data.message)
-      );
+      )
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -120,12 +125,21 @@ export function SignUpForm() {
       </div>
 
       <div>
-        <button
+        <LoadingButton
+          isLoading={isLoading}
           type="submit"
-          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="py-2 px-4 w-full"
+          childrenWhileLoading={
+            <>
+              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                <LoaderCircle className="animate-spin h-5 w-5" />
+              </span>
+              Signing Up...
+            </>
+          }
         >
-          Sign up
-        </button>
+          Sign Up
+        </LoadingButton>
       </div>
     </form>
   );

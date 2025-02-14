@@ -21,6 +21,8 @@ export default function GroupForm({ onSubmit, onClose }: GroupFormProps) {
       .post<GroupInterface>("/api/v1/group", { name, description })
       .then((response) => onSubmit(response.data))
       .then(() => onClose())
+      .then(() => setName(""))
+      .then(() => setDescription(""))
       .catch(
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&
@@ -75,10 +77,17 @@ export default function GroupForm({ onSubmit, onClose }: GroupFormProps) {
               required
             />
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
             >
               Create Group
             </button>

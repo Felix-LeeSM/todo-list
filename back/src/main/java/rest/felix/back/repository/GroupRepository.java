@@ -71,4 +71,16 @@ public class GroupRepository {
     }
 
   }
+
+  public void deleteGroupById(long groupId) {
+    em.createQuery("""
+        DELETE
+        FROM
+          Group g
+        WHERE
+          g.id =:groupId
+        """)
+        .setParameter("groupId", groupId)
+        .executeUpdate();
+  }
 }

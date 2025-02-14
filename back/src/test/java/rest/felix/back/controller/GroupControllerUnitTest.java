@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,11 @@ import org.springframework.test.context.ActiveProfiles;
 import rest.felix.back.dto.request.CreateGroupRequestDTO;
 import rest.felix.back.dto.response.GroupResponseDTO;
 import rest.felix.back.entity.Group;
+import rest.felix.back.entity.Todo;
 import rest.felix.back.entity.User;
 import rest.felix.back.entity.UserGroup;
 import rest.felix.back.entity.enumerated.GroupRole;
+import rest.felix.back.entity.enumerated.TodoStatus;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
 import rest.felix.back.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
@@ -324,7 +327,7 @@ public class GroupControllerUnitTest {
 
     // Then
 
-    Assertions.assertThrows(ResourceNotFoundException.class, lambda::run);
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
 
   }
 
@@ -409,5 +412,343 @@ public class GroupControllerUnitTest {
 
   }
 
+  @Test
+  public void deleteGroup_HappyPath() {
 
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setAuthor(user);
+    todo.setGroup(group);
+
+    em.persist(todo);
+
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    groupController.deleteGroup(principal, group.getId());
+
+    // Then
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  g
+                FROM
+                  Group g
+                WHERE
+                  g.id = :groupId
+                """, Group.class)
+            .setParameter("groupId", group.getId())
+            .getResultStream()
+            .findFirst()
+            .isEmpty()
+    );
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  t
+                FROM
+                  Todo t
+                WHERE
+                  t.group.id = :groupId
+                """, Todo.class)
+            .setParameter("groupId", group.getId())
+            .getResultStream()
+            .findFirst()
+            .isEmpty()
+    );
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  ug
+                FROM
+                  UserGroup ug
+                WHERE
+                  ug.group.id = :groupId
+                """, UserGroup.class)
+            .setParameter("groupId", group.getId())
+            .getResultStream()
+            .findFirst()
+            .isEmpty()
+    );
+
+  }
+
+  @Test
+  public void deleteGroup_Failure_NoAuthority() {
+
+    // Given
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
+
+    em.flush();
+
+    Stream.of(
+        GroupRole.MANAGER,
+        GroupRole.VIEWER,
+        GroupRole.MEMBER
+    ).forEach(role -> {
+
+      User user = new User();
+      user.setUsername("username" + role);
+      user.setNickname("nickname");
+      user.setHashedPassword("hashedPassword");
+      em.persist(user);
+
+      UserGroup userGroup = new UserGroup();
+      userGroup.setGroupRole(role);
+      userGroup.setUser(user);
+      userGroup.setGroup(group);
+      em.persist(userGroup);
+
+      Todo todo = new Todo();
+      todo.setTitle("todo title");
+      todo.setDescription("todo description");
+      todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+      todo.setAuthor(user);
+      todo.setGroup(group);
+
+      em.persist(todo);
+
+      em.flush();
+
+      Principal principal = user::getUsername;
+
+      // When
+
+      Runnable lambda = () -> groupController.deleteGroup(principal, group.getId());
+
+      // Then
+
+      Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+
+      Assertions.assertTrue(
+          em.createQuery("""
+                SELECT
+                  g
+                FROM
+                  Group g
+                WHERE
+                  g.id = :groupId
+                """, Group.class)
+              .setParameter("groupId", group.getId())
+              .getResultStream()
+              .findFirst()
+              .isPresent()
+      );
+
+      Assertions.assertTrue(
+          em.createQuery("""
+                SELECT
+                  t
+                FROM
+                  Todo t
+                WHERE
+                  t.group.id = :groupId
+                """, Todo.class)
+              .setParameter("groupId", group.getId())
+              .getResultStream()
+              .findFirst()
+              .isPresent()
+      );
+
+      Assertions.assertTrue(
+          em.createQuery("""
+                SELECT
+                  ug
+                FROM
+                  UserGroup ug
+                WHERE
+                  ug.group.id = :groupId
+                """, UserGroup.class)
+              .setParameter("groupId", group.getId())
+              .getResultStream()
+              .findFirst()
+              .isPresent()
+      );
+    });
+
+
+  }
+
+  @Test
+  public void deleteGroup_Failure_NoUser() {
+
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
+
+    em.flush();
+
+    em.remove(userGroup);
+    em.remove(user);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> groupController.deleteGroup(principal, group.getId());
+
+    // Then
+
+    Assertions.assertThrows(NoMatchingUserException.class, lambda::run);
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  g
+                FROM
+                  Group g
+                WHERE
+                  g.id = :groupId
+                """, Group.class)
+            .setParameter("groupId", group.getId())
+            .getResultStream()
+            .findFirst()
+            .isPresent()
+    );
+  }
+
+  @Test
+  public void deleteGroup_Failure_NoUserGroup() {
+
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
+
+    em.flush();
+
+    em.remove(userGroup);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> groupController.deleteGroup(principal, group.getId());
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  g
+                FROM
+                  Group g
+                WHERE
+                  g.id = :groupId
+                """, Group.class)
+            .setParameter("groupId", group.getId())
+            .getResultStream()
+            .findFirst()
+            .isPresent()
+    );
+
+  }
+
+  @Test
+  public void deleteGroup_Failure_NoGroup() {
+
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    em.persist(userGroup);
+
+    em.flush();
+
+    em.remove(userGroup);
+    em.remove(group);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> groupController.getUserGroup(principal, group.getId());
+
+    // Then
+
+    Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+
+  }
 }

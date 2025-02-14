@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,8 @@ import rest.felix.back.dto.internal.GroupDTO;
 import rest.felix.back.dto.internal.UserDTO;
 import rest.felix.back.dto.request.CreateGroupRequestDTO;
 import rest.felix.back.dto.response.GroupResponseDTO;
+import rest.felix.back.entity.enumerated.GroupRole;
+import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
 import rest.felix.back.exception.throwable.unauthorized.NoMatchingUserException;
 import rest.felix.back.service.GroupService;
 import rest.felix.back.service.UserService;
@@ -78,8 +81,9 @@ public class GroupController {
     UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
     long userId = userDTO.getId();
 
+    groupService.getUserRoleInGroup(userId, groupId);
+
     GroupDTO groupDTO = groupService.getGroupById(groupId);
-    groupService.getUserRoleInGroup(userId, groupDTO.getId());
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO(groupDTO.getId(), groupDTO.getName(),
         groupDTO.getDescription());
 
@@ -87,6 +91,29 @@ public class GroupController {
         .status(HttpStatus.OK)
         .body(groupResponseDTO);
 
+  }
+
+  @DeleteMapping("/{groupId}")
+  public ResponseEntity<Void> deleteGroup(
+      Principal principal,
+      @PathVariable(name = "groupId") long groupId
+  ) {
+    String username = principal.getName();
+
+    UserDTO userDTO = userService.getByUsername(username).orElseThrow(NoMatchingUserException::new);
+    long userId = userDTO.getId();
+
+    GroupRole groupRole = groupService.getUserRoleInGroup(userId, groupId);
+
+    if (groupRole != GroupRole.OWNER) {
+      throw new UserAccessDeniedException();
+    }
+
+    groupService.deleteGroupById(groupId);
+
+    return ResponseEntity
+        .noContent()
+        .build();
   }
 
 }

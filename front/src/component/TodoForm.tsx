@@ -25,6 +25,7 @@ export default function TodoForm({ onSubmit }: TodoFormProps) {
       })
       .then((res) => onSubmit(res.data))
       .then(() => setTitle(""))
+      .then(() => setDescription(""))
       .catch(
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&

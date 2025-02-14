@@ -124,4 +124,16 @@ public class TodoRepository {
         .orElseThrow(ResourceNotFoundException::new);
 
   }
+
+  public void deleteByGroupId(long groupId) {
+    em.createQuery("""
+        DELETE
+        FROM
+          Todo t
+        WHERE
+          t.group.id =:groupId
+        """)
+        .setParameter("groupId", groupId)
+        .executeUpdate();
+  }
 }

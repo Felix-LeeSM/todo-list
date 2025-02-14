@@ -20,6 +20,10 @@ export function SignUpForm() {
     axios
       .post<UserInterface>("/api/v1/user", body)
       .then(() => navigate("/signin"))
+      .then(() => setUsername(""))
+      .then(() => setNickname(""))
+      .then(() => setPassword(""))
+      .then(() => setConfirmPassword(""))
       .catch(
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&
@@ -30,7 +34,7 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-      <div className="rounded-md shadow-sm -space-y-px">
+      <div className="rounded-md shadow-sm">
         <div>
           <label htmlFor="username" className="sr-only">
             Username

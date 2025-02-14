@@ -125,7 +125,7 @@ public class UserControllerWebTest {
     String path = "/api/v1/user";
 
     SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "username",
+        "user",
         "nickname",
         "LongEnoughPassword",
         "LongEnoughPassword");

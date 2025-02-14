@@ -8,12 +8,12 @@ import {
   X,
 } from "lucide-react";
 
-interface TodoItemProps {
+interface TodoCardProps {
   todo: TodoInterface;
   onDelete: (todo: TodoInterface) => void;
 }
 
-export default function TodoItem({ todo, onDelete }: TodoItemProps) {
+export default function TodoCard({ todo, onDelete }: TodoCardProps) {
   const statusColors = {
     TO_DO: "bg-yellow-100 border-yellow-300",
     IN_PROGRESS: "bg-orange-100 border-orange-300",

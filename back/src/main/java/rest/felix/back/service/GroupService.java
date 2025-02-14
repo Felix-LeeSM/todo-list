@@ -11,6 +11,7 @@ import rest.felix.back.entity.enumerated.GroupRole;
 import rest.felix.back.exception.throwable.forbidden.UserAccessDeniedException;
 import rest.felix.back.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.repository.GroupRepository;
+import rest.felix.back.repository.TodoRepository;
 import rest.felix.back.repository.UserGroupRepository;
 
 @Service
@@ -20,6 +21,7 @@ public class GroupService {
 
   private final GroupRepository groupRepository;
   private final UserGroupRepository userGroupRepository;
+  private final TodoRepository todoRepository;
 
   public GroupDTO createGroup(CreateGroupDTO createGroupDTO) {
 
@@ -46,7 +48,13 @@ public class GroupService {
         .getByUserIdAndGroupId(userId, groupId)
         .map(UserGroupDTO::getGroupRole)
         .orElseThrow(UserAccessDeniedException::new);
+  }
 
+  public void deleteGroupById(long groupId) {
+    userGroupRepository.deleteByGroupId(groupId);
+    todoRepository.deleteByGroupId(groupId);
+
+    groupRepository.deleteGroupById(groupId);
   }
 
 }

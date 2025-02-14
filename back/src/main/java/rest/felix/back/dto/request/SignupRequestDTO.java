@@ -10,7 +10,7 @@ import lombok.Getter;
 public class SignupRequestDTO {
 
   @NotNull
-  @Size(min = 10, max = 50)
+  @Size(min = 7, max = 50)
   private String username;
 
   @NotNull
@@ -18,11 +18,11 @@ public class SignupRequestDTO {
   private String nickname;
 
   @NotNull
-  @Size(min = 15, max = 100)
+  @Size(min = 10, max = 100)
   private String password;
 
   @NotNull
-  @Size(min = 15, max = 100)
+  @Size(min = 10, max = 100)
   private String confirmPassword;
 
 }

@@ -31,7 +31,6 @@ export default function TodoManager({ group }: TodoManagerProps) {
   const addTodo = (todo: TodoInterface) =>
     setTodos((todos) => [...todos, todo]);
 
-  // 변경: onDragEnd 함수 추가 (드래그 완료 시 todo 상태 업데이트)
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 

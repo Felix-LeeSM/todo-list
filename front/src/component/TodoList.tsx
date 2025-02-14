@@ -1,6 +1,6 @@
 import { TodoInterface } from "../type/Todo.interface";
 import { TodoStatus } from "../type/TodoStatus";
-import TodoItem from "./TodoItem";
+import TodoCard from "./TodoCard";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 
 export type TodoItemProps = {
@@ -32,7 +32,7 @@ export function TodoList({ todos, todoStatus, onDelete }: TodoItemProps) {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                   >
-                    <TodoItem todo={todo} onDelete={onDelete} />
+                    <TodoCard todo={todo} onDelete={onDelete} />
                   </div>
                 )}
               </Draggable>

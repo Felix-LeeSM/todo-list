@@ -7,7 +7,7 @@ import { ErrorInterface } from "../type/Error.interface";
 import { toast } from "react-toastify";
 
 export function SignInForm(props: {
-  handleSubmit?: (e: React.FormEvent) => void;
+  handleSubmit: (e: React.FormEvent) => void;
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -16,13 +16,14 @@ export function SignInForm(props: {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const body = { username, password };
+
     axios
-      .post<UserInterface>("/api/v1/user/token/access-token", {
-        username,
-        password,
-      })
+      .post<UserInterface>("/api/v1/user/token/access-token", body)
       .then((res) => handleSignIn(res.data))
-      .then(() => props.handleSubmit && props.handleSubmit(e))
+      .then(() => props.handleSubmit(e))
+      .then(() => setUsername(""))
+      .then(() => setPassword(""))
       .catch(
         (err) =>
           axios.isAxiosError<ErrorInterface>(err) &&
@@ -33,7 +34,7 @@ export function SignInForm(props: {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-      <div className="rounded-md shadow-sm -space-y-px">
+      <div className="rounded-md shadow-sm">
         <div>
           <label htmlFor="username" className="sr-only">
             Username

@@ -402,4 +402,39 @@ class GroupServiceTest {
     Assertions.assertThrows(ResourceNotFoundException.class, lambda::run);
   }
 
+  @Test
+  void deleteGroupById_HappyPath() {
+    // Given
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+
+    em.persist(group);
+    em.flush();
+
+    // When
+
+    groupService.deleteGroupById(group.getId());
+
+    // Then
+
+    Assertions.assertTrue(
+        em.createQuery("""
+                SELECT
+                  g
+                FROM
+                  Group g
+                WHERE
+                  g.id = :groupId 
+                """, Group.class)
+            .setParameter("groupId", group.getId())
+            .getResultStream()
+            .findFirst()
+            .isEmpty()
+
+    );
+
+  }
+
 }

@@ -1,8 +1,9 @@
 package rest.felix.back.service;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rest.felix.back.dto.internal.CreateGroupDTO;
 import rest.felix.back.dto.internal.GroupDTO;
@@ -15,16 +16,11 @@ import rest.felix.back.repository.UserGroupRepository;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class GroupService {
 
   private final GroupRepository groupRepository;
   private final UserGroupRepository userGroupRepository;
-
-  @Autowired
-  public GroupService(GroupRepository groupRepository, UserGroupRepository userGroupRepository) {
-    this.groupRepository = groupRepository;
-    this.userGroupRepository = userGroupRepository;
-  }
 
   public GroupDTO createGroup(CreateGroupDTO createGroupDTO) {
 

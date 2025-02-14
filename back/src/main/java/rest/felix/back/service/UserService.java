@@ -1,6 +1,8 @@
 package rest.felix.back.service;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import rest.felix.back.dto.internal.SignupDTO;
@@ -14,13 +16,10 @@ import rest.felix.back.repository.UserRepository;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class UserService {
 
   private final UserRepository userRepository;
-
-  public UserService(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
 
   public UserDTO signup(SignupDTO signupDTO) {
     User user = userRepository.createUser(signupDTO);

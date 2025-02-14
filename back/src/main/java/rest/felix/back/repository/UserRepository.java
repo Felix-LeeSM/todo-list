@@ -3,8 +3,9 @@ package rest.felix.back.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
+import lombok.AllArgsConstructor;
+
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import rest.felix.back.dto.internal.SignupDTO;
@@ -12,14 +13,10 @@ import rest.felix.back.entity.User;
 import rest.felix.back.exception.throwable.badrequest.UsernameTakenException;
 
 @Repository
+@AllArgsConstructor
 public class UserRepository {
 
   private final EntityManager em;
-
-  @Autowired
-  public UserRepository(EntityManager entityManager) {
-    this.em = entityManager;
-  }
 
   public User createUser(SignupDTO signupDTO) throws UsernameTakenException {
     try {

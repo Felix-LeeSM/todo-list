@@ -1,8 +1,8 @@
-import { useContext } from "react";
+import { ReactNode, useContext } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "../context/auth/AuthContext";
 
-export function GuestRoute({ children }: { children: JSX.Element }) {
+export function GuestRoute({ children }: { children: ReactNode }) {
   const { user } = useContext(AuthContext);
 
   if (user) {

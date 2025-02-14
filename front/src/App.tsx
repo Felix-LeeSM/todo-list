@@ -26,7 +26,14 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/group" element={<UserRoute children={<Group />} />} />
+            <Route
+              path="/group"
+              element={
+                <UserRoute>
+                  <Group />
+                </UserRoute>
+              }
+            />
             <Route
               path="/group/:groupId"
               element={
@@ -41,11 +48,19 @@ function App() {
             />
             <Route
               path="/signin"
-              element={<GuestRoute children={<SignIn />} />}
+              element={
+                <GuestRoute>
+                  <SignIn />
+                </GuestRoute>
+              }
             />
             <Route
               path="/signup"
-              element={<GuestRoute children={<SignUp />} />}
+              element={
+                <GuestRoute>
+                  <SignUp />
+                </GuestRoute>
+              }
             />
           </Routes>
         </BrowserRouter>

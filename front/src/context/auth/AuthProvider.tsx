@@ -12,9 +12,7 @@ export function AuthProvider({
   const [user, setUser] = useState<UserInterface>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleSignIn = (user: UserInterface) => {
-    setUser(user);
-  };
+  const handleSignIn = (user: UserInterface) => setUser(user);
 
   const handleLogOut = () => {
     axios

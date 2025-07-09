@@ -49,21 +49,22 @@ export default function GroupList() {
           <span>Add Group</span>
         </button>
       </div>
-      {isLoading && (
+      {isLoading ? (
         <div className="w-full h-full flex justify-center items-center">
           <LoaderCircle className="animate-spin h-10 w-10 mt-20" />
         </div>
-      )}
+      ) : null}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {isLoading ||
-          groups.map((group) => (
-            <GroupCard
-              onSelect={onSelectGroup}
-              onDelete={onDeleteGroup}
-              group={group}
-              key={`group-${group.id}`}
-            />
-          ))}
+        {isLoading
+          ? null
+          : groups.map((group) => (
+              <GroupCard
+                onSelect={onSelectGroup}
+                onDelete={onDeleteGroup}
+                group={group}
+                key={`group-${group.id}`}
+              />
+            ))}
       </div>
       {isModalOpen && (
         <GroupForm onSubmit={addGroup} onClose={() => setIsModalOpen(false)} />

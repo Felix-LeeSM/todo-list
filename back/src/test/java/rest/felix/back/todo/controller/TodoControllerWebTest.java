@@ -36,7 +36,7 @@ import rest.felix.back.group.entity.UserGroup;
 import rest.felix.back.group.entity.enumerated.GroupRole;
 import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.common.security.JwtTokenProvider;
-import rest.felix.back.common.util.Pair;
+import rest.felix.back.common.util.Trio;
 
 @SpringBootTest
 @Transactional
@@ -82,15 +82,16 @@ public class TodoControllerWebTest {
 
     em.persist(userGroup);
 
-    List<Pair<TodoStatus, Integer>> list = Arrays.asList(
-        new Pair<>(TodoStatus.TO_DO, 1),
-        new Pair<>(TodoStatus.IN_PROGRESS, 2),
-        new Pair<>(TodoStatus.DONE, 3),
-        new Pair<>(TodoStatus.ON_HOLD, 4));
+    List<Trio<TodoStatus, String, Integer>> list = Arrays.asList(
+        new Trio<>(TodoStatus.TO_DO, "c", 1),
+        new Trio<>(TodoStatus.IN_PROGRESS, "a", 2),
+        new Trio<>(TodoStatus.DONE, "b", 3),
+        new Trio<>(TodoStatus.ON_HOLD, "d", 4));
 
-    list.forEach(pair -> {
-      TodoStatus todoStatus = pair.first();
-      int idx = pair.second();
+    list.forEach(trio -> {
+      TodoStatus todoStatus = trio.first();
+      String order = trio.second();
+      int idx = trio.third();
 
       Todo todo = new Todo();
       todo.setTitle(String.format("todo %d", idx));
@@ -98,6 +99,7 @@ public class TodoControllerWebTest {
       todo.setTodoStatus(todoStatus);
       todo.setAuthor(user);
       todo.setGroup(group);
+      todo.setOrder(order);
       em.persist(todo);
     });
 
@@ -119,16 +121,22 @@ public class TodoControllerWebTest {
 
     result.andExpect(status().isOk());
     result.andExpect(jsonPath("$", hasSize(4)));
-    result.andExpect(jsonPath("$[*].id", everyItem(notNullValue())));
-    result.andExpect(jsonPath("$[*].authorId", everyItem(equalTo(user.getId().intValue()))));
-    result.andExpect(jsonPath("$[*].groupId", everyItem(equalTo(group.getId().intValue()))));
-    result.andExpect(
-        jsonPath("$[*].title", containsInAnyOrder("todo 1", "todo 2", "todo 3", "todo 4")));
-    result.andExpect(jsonPath("$[*].description",
-        containsInAnyOrder("todo 1 description", "todo 2 description", "todo 3 description",
-            "todo 4 description")));
-    result.andExpect(
-        jsonPath("$[*].status", containsInAnyOrder("TO_DO", "IN_PROGRESS", "DONE", "ON_HOLD")));
+    result.andExpect(jsonPath("$[0].title", equalTo("todo 2")));
+    result.andExpect(jsonPath("$[0].description", equalTo("todo 2 description")));
+    result.andExpect(jsonPath("$[0].status", equalTo("IN_PROGRESS")));
+    result.andExpect(jsonPath("$[0].order", equalTo("a")));
+    result.andExpect(jsonPath("$[1].title", equalTo("todo 3")));
+    result.andExpect(jsonPath("$[1].description", equalTo("todo 3 description")));
+    result.andExpect(jsonPath("$[1].status", equalTo("DONE")));
+    result.andExpect(jsonPath("$[1].order", equalTo("b")));
+    result.andExpect(jsonPath("$[2].title", equalTo("todo 1")));
+    result.andExpect(jsonPath("$[2].description", equalTo("todo 1 description")));
+    result.andExpect(jsonPath("$[2].status", equalTo("TO_DO")));
+    result.andExpect(jsonPath("$[2].order", equalTo("c")));
+    result.andExpect(jsonPath("$[3].title", equalTo("todo 4")));
+    result.andExpect(jsonPath("$[3].description", equalTo("todo 4 description")));
+    result.andExpect(jsonPath("$[3].status", equalTo("ON_HOLD")));
+    result.andExpect(jsonPath("$[3].order", equalTo("d")));
 
   }
 
@@ -378,6 +386,7 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$.title", equalTo("todo title")));
     result.andExpect(jsonPath("$.description", equalTo("todo description")));
     result.andExpect(jsonPath("$.status", equalTo("TO_DO")));
+    result.andExpect(jsonPath("$.order", equalTo("a")));
 
   }
 
@@ -1137,6 +1146,7 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$.title", equalTo("updated todo title")));
     result.andExpect(jsonPath("$.description", equalTo("updated todo description")));
     result.andExpect(jsonPath("$.status", equalTo("ON_HOLD")));
+    result.andExpect(jsonPath("$.order", equalTo("someOrder")));
     result.andExpect(jsonPath("$.authorId", equalTo(user.getId().intValue())));
     result.andExpect(jsonPath("$.groupId", equalTo(group.getId().intValue())));
 

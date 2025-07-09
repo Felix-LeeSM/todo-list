@@ -11,14 +11,16 @@ export type TodoItemProps = {
 
 export function TodoList({ todos, todoStatus, onDelete }: TodoItemProps) {
   return (
-    <div key={todoStatus} className="bg-gray-100 p-4 rounded-lg">
+    <div className="bg-gray-100 p-4 rounded-lg flex flex-col">
       <h3 className="text-lg font-semibold mb-2">{todoStatus}</h3>
       <Droppable droppableId={todoStatus}>
-        {(provided) => (
+        {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="space-y-2 min-h-0"
+            className={`flex-grow space-y-2 min-h-24 rounded-lg ${
+              snapshot.isDraggingOver ? "bg-gray-200" : ""
+            }`}
           >
             {todos.map((todo, index) => (
               <Draggable

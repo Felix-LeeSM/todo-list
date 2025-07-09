@@ -2,7 +2,7 @@ spring:
   application:
     name: back
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:127.0.0.1}:${DATABASE_PORT:5432}/${DATABASE_DATABASE:min_chan}
+    url: jdbc:postgresql://${DATABASE_HOST:127.0.0.1}:${DATABASE_PORT:5432}/${DATABASE_DATABASE:min_chan}?currentSchema=${DATABASE_SCHEMA:public}
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver

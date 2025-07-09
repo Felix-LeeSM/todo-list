@@ -99,6 +99,11 @@ class TodoServiceTest {
         .containsAll(
             List.of("todo 1 description", "todo 2 description", "todo 3 description")));
 
+    Assertions.assertTrue(todoDTOs
+        .stream()
+        .map(TodoDTO::getOrder)
+        .allMatch(order -> order.equals("a")));
+
   }
 
   @Test
@@ -192,6 +197,7 @@ class TodoServiceTest {
     Assertions.assertEquals(TodoStatus.TO_DO, todoDTO.getStatus());
     Assertions.assertEquals(user.getId(), todoDTO.getAuthorId());
     Assertions.assertEquals(group.getId(), todoDTO.getGroupId());
+    Assertions.assertEquals("a", todoDTO.getOrder());
 
   }
 

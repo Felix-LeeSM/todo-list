@@ -24,7 +24,7 @@ import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.common.exception.throwable.forbidden.UserAccessDeniedException;
 import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.common.exception.throwable.unauthorized.NoMatchingUserException;
-import rest.felix.back.common.util.Pair;
+import rest.felix.back.common.util.Trio;
 
 @SpringBootTest
 @Transactional
@@ -59,15 +59,16 @@ public class TodoControllerUnitTest {
 
     em.persist(userGroup);
 
-    List<Pair<TodoStatus, Integer>> list = Arrays.asList(
-        new Pair<>(TodoStatus.TO_DO, 1),
-        new Pair<>(TodoStatus.IN_PROGRESS, 2),
-        new Pair<>(TodoStatus.DONE, 3),
-        new Pair<>(TodoStatus.ON_HOLD, 4));
+    List<Trio<TodoStatus, String, Integer>> list = Arrays.asList(
+        new Trio<>(TodoStatus.TO_DO, "c", 1),
+        new Trio<>(TodoStatus.IN_PROGRESS, "a", 2),
+        new Trio<>(TodoStatus.DONE, "b", 3),
+        new Trio<>(TodoStatus.ON_HOLD, "d", 4));
 
-    list.forEach(pair -> {
-      TodoStatus todoStatus = pair.first();
-      int idx = pair.second();
+    list.forEach(trio -> {
+      TodoStatus todoStatus = trio.first();
+      String order = trio.second();
+      int idx = trio.third();
 
       Todo todo = new Todo();
       todo.setTitle(String.format("todo %d", idx));
@@ -75,6 +76,7 @@ public class TodoControllerUnitTest {
       todo.setTodoStatus(todoStatus);
       todo.setAuthor(user);
       todo.setGroup(group);
+      todo.setOrder(order);
       em.persist(todo);
     });
 
@@ -93,45 +95,42 @@ public class TodoControllerUnitTest {
 
     List<TodoResponseDTO> todoResponseDTOs = responseEntity.getBody();
     Assertions.assertEquals(4, todoResponseDTOs.size());
+
+    // todo with order "a" is todo 2
+    Assertions.assertEquals("todo 2", todoResponseDTOs.get(0).title());
+    Assertions.assertEquals("todo 2 description", todoResponseDTOs.get(0).description());
+    Assertions.assertEquals(TodoStatus.IN_PROGRESS, todoResponseDTOs.get(0).status());
+    Assertions.assertEquals("a", todoResponseDTOs.get(0).order());
+
+    // todo with order "b" is todo 3
+    Assertions.assertEquals("todo 3", todoResponseDTOs.get(1).title());
+    Assertions.assertEquals("todo 3 description", todoResponseDTOs.get(1).description());
+    Assertions.assertEquals(TodoStatus.DONE, todoResponseDTOs.get(1).status());
+    Assertions.assertEquals("b", todoResponseDTOs.get(1).order());
+
+    // todo with order "c" is todo 1
+    Assertions.assertEquals("todo 1", todoResponseDTOs.get(2).title());
+    Assertions.assertEquals("todo 1 description", todoResponseDTOs.get(2).description());
+    Assertions.assertEquals(TodoStatus.TO_DO, todoResponseDTOs.get(2).status());
+    Assertions.assertEquals("c", todoResponseDTOs.get(2).order());
+
+    // todo with order "d" is todo 4
+    Assertions.assertEquals("todo 4", todoResponseDTOs.get(3).title());
+    Assertions.assertEquals("todo 4 description", todoResponseDTOs.get(3).description());
+    Assertions.assertEquals(TodoStatus.ON_HOLD, todoResponseDTOs.get(3).status());
+    Assertions.assertEquals("d", todoResponseDTOs.get(3).order());
+
     Assertions.assertTrue(
         todoResponseDTOs
             .stream()
             .map(TodoResponseDTO::authorId)
-            .map(authorId -> authorId.equals(user.getId()))
-            .reduce(true, (one, another) -> one && another));
+            .allMatch(authorId -> authorId.equals(user.getId())));
 
     Assertions.assertTrue(
         todoResponseDTOs
             .stream()
             .map(TodoResponseDTO::groupId)
-            .map(groupId -> groupId.equals(group.getId()))
-            .reduce(true, (one, another) -> one && another));
-
-    Assertions.assertTrue(
-        todoResponseDTOs
-            .stream()
-            .map(TodoResponseDTO::title)
-            .toList()
-            .containsAll(
-                List.of("todo 1", "todo 2", "todo 3", "todo 4")));
-
-    Assertions.assertTrue(
-        todoResponseDTOs
-            .stream()
-            .map(TodoResponseDTO::description)
-            .toList()
-            .containsAll(
-                List.of("todo 1 description", "todo 2 description", "todo 3 description",
-                    "todo 4 description")));
-
-    Assertions.assertTrue(
-        todoResponseDTOs
-            .stream()
-            .map(TodoResponseDTO::status)
-            .toList()
-            .containsAll(
-                List.of(TodoStatus.TO_DO, TodoStatus.IN_PROGRESS, TodoStatus.DONE,
-                    TodoStatus.ON_HOLD)));
+            .allMatch(groupId -> groupId.equals(group.getId())));
 
   }
 
@@ -342,6 +341,7 @@ public class TodoControllerUnitTest {
     Assertions.assertEquals(TodoStatus.TO_DO, todoResponseDTO.status());
     Assertions.assertEquals(user.getId(), todoResponseDTO.authorId());
     Assertions.assertEquals(group.getId(), todoResponseDTO.groupId());
+    Assertions.assertEquals("a", todoResponseDTO.order());
   }
 
   @Test
@@ -944,6 +944,7 @@ public class TodoControllerUnitTest {
     Assertions.assertEquals("updated todo title", todoDTO.getTitle());
     Assertions.assertEquals("updated todo description", todoDTO.getDescription());
     Assertions.assertEquals(TodoStatus.DONE, todoDTO.getStatus());
+    Assertions.assertEquals("someOrder", todoDTO.getOrder());
 
     Todo updatedTodo = em
         .createQuery("""

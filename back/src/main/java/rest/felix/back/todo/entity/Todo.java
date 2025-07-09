@@ -18,8 +18,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.user.entity.User;
 import rest.felix.back.group.entity.Group;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
 @ToString
 @Getter

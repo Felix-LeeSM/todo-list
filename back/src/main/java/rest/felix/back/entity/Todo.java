@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,8 +46,8 @@ public class Todo {
   private TodoStatus todoStatus = TodoStatus.TO_DO;
 
   @CreationTimestamp
-  private OffsetDateTime createdAt;
+  private ZonedDateTime createdAt;
 
   @UpdateTimestamp
-  private OffsetDateTime updatedAt;
+  private ZonedDateTime updatedAt;
 }

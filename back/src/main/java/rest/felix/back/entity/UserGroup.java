@@ -11,7 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +24,7 @@ import rest.felix.back.entity.enumerated.GroupRole;
 @Setter
 @ToString
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "groupId"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "userId", "groupId" }))
 public class UserGroup {
 
   @Id
@@ -45,9 +45,9 @@ public class UserGroup {
   private GroupRole groupRole;
 
   @CreationTimestamp
-  private OffsetDateTime createdAt;
+  private ZonedDateTime createdAt;
 
   @UpdateTimestamp
-  private OffsetDateTime updatedAt;
+  private ZonedDateTime updatedAt;
 
 }

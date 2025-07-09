@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -41,10 +41,10 @@ public class Group {
   private List<Todo> todos = new ArrayList<>();
 
   @CreationTimestamp
-  private OffsetDateTime createdAt;
+  private ZonedDateTime createdAt;
 
   @UpdateTimestamp
-  private OffsetDateTime updatedAt;
+  private ZonedDateTime updatedAt;
 
   public void addUserGroup(UserGroup userGroup) {
     this.userGroups.add(userGroup);

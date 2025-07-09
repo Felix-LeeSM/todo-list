@@ -30,7 +30,6 @@ export function useTodoDragDrop({
     const newStatus = destination.droppableId as TodoStatus;
     const statusTodos = todosByStatus[newStatus];
 
-    // Calculate new order
     const prevTodo = statusTodos.at(destination.index - 1);
     const nextTodo = statusTodos.at(destination.index + 1);
     const newOrder = generateOrder(prevTodo?.order, nextTodo?.order);

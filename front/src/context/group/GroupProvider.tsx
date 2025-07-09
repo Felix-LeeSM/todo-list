@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import { groupApi } from "../../services/groupApi";
 import { LoaderCircle } from "lucide-react";
 import { GroupContext } from "./GroupContext";
 import type { GroupInterface } from "../../type/Group.interface";
@@ -13,16 +13,20 @@ export function GroupProvider({
   const [group, setGroup] = useState<GroupInterface>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const { groupId } = useParams<{ groupId?: string }>();
+  const { groupId } = useParams<{ groupId: string }>();
 
   const handleSetGroup = (group?: GroupInterface) => {
     setGroup(group);
   };
 
   useEffect(() => {
-    axios
-      .get<GroupInterface>(`/api/v1/group/${groupId}`)
-      .then((res) => setGroup(res.data))
+    if (!groupId) return;
+    const parsedId = parseInt(groupId, 10);
+    if (isNaN(parsedId)) return;
+
+    groupApi
+      .getGroupById(parsedId)
+      .then((res) => setGroup(res))
       .catch(() => setGroup(undefined))
       .finally(() => setIsLoading(false));
   }, []);

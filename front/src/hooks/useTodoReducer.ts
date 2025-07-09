@@ -21,7 +21,7 @@ function todoReducer(state: TodoState, action: TodoAction): TodoState {
         ...state,
         todos: action.payload,
         loading: false,
-        previousState: state.todos, // Save for potential rollback
+        previousState: state.todos,
       };
 
     case "ADD_TODO":

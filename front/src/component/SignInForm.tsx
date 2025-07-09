@@ -1,4 +1,5 @@
-import axios from "axios";
+import { authApi } from "../services/authApi";
+
 import { useContext, useState } from "react";
 import type { UserInterface } from "../type/User.interface";
 import { AuthContext } from "../context/auth/AuthContext";
@@ -23,9 +24,9 @@ export function SignInForm() {
 
     const body = { username, password };
 
-    axios
-      .post<UserInterface>("/api/v1/user/token/access-token", body)
-      .then((res) => handleSignIn(res.data))
+    authApi
+      .signIn(body)
+      .then((res) => handleSignIn(res))
       .then(() => setUsername(""))
       .then(() => setPassword(""))
       .then(() => navigate("/group"))

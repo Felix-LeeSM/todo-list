@@ -1,27 +1,36 @@
 import axios from "axios";
-import type { TodoInterface } from "../type/Todo.interface";
+import type {
+  CreateTodoRequestDTO,
+  TodoInterface,
+} from "../type/Todo.interface";
 
 export const todoApi = {
-  getTodos: async (groupId: number): Promise<TodoInterface[]> => {
-    const response = await axios.get<TodoInterface[]>(
-      `/api/v1/group/${groupId}/todo`
-    );
-    return response.data;
+  getTodos: (groupId: number): Promise<TodoInterface[]> => {
+    return axios
+      .get<TodoInterface[]>(`/api/v1/group/${groupId}/todo`)
+      .then((res) => res.data);
   },
 
-  updateTodo: async (
+  createTodo: (
+    todo: CreateTodoRequestDTO,
+    groupId: number
+  ): Promise<TodoInterface> => {
+    return axios
+      .post<TodoInterface>(`/api/v1/group/${groupId}/todo`, todo)
+      .then((res) => res.data);
+  },
+
+  updateTodo: (
     groupId: number,
     todoId: number,
     todo: TodoInterface
   ): Promise<TodoInterface> => {
-    const response = await axios.put<TodoInterface>(
-      `/api/v1/group/${groupId}/todo/${todoId}`,
-      todo
-    );
-    return response.data;
+    return axios
+      .put<TodoInterface>(`/api/v1/group/${groupId}/todo/${todoId}`, todo)
+      .then((res) => res.data);
   },
 
-  deleteTodo: async (groupId: number, todoId: number): Promise<void> => {
-    await axios.delete(`/api/v1/group/${groupId}/todo/${todoId}`);
+  deleteTodo: (groupId: number, todoId: number): Promise<void> => {
+    return axios.delete(`/api/v1/group/${groupId}/todo/${todoId}`);
   },
 };

@@ -9,3 +9,5 @@ export interface TodoInterface {
   groupId: number;
   order: string;
 }
+
+export type CreateTodoRequestDTO = Pick<TodoInterface, "title" | "description">;

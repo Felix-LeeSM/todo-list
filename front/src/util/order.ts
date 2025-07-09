@@ -13,24 +13,25 @@ export const generateOrder = (prev?: string, next?: string): string => {
 
 const generateOrderBetween = (prev: string, next: string): string => {
   let position = 0;
-  let result = "";
+  let result = [];
 
   while (true) {
     const prevCharIndex = getCharIndex(prev, position);
     const nextCharIndex = getCharIndex(next, position);
 
     if (prevCharIndex === nextCharIndex) {
-      result += CHARACTERS[prevCharIndex];
+      result.push(CHARACTERS[prevCharIndex]);
       position++;
       continue;
     }
 
     if (canInsertBetween(prevCharIndex, nextCharIndex)) {
       const middleIndex = calculateMiddleIndex(prevCharIndex, nextCharIndex);
-      return result + CHARACTERS[middleIndex];
+      result.push(CHARACTERS[middleIndex]);
+      return result.join("");
     }
 
-    return extendWithMiddleChar(result, prev, prevCharIndex, position);
+    return extendWithMiddleChar(result.join(""), prev, prevCharIndex, position);
   }
 };
 

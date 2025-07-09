@@ -1,6 +1,5 @@
-import axios from "axios";
+import { authApi } from "../services/authApi";
 import { useState } from "react";
-import type { UserInterface } from "../type/User.interface";
 import { useNavigate } from "react-router-dom";
 import { User, Lock, IdCard, LoaderCircle } from "lucide-react";
 import { LoadingButton } from "./LoadingButton";
@@ -20,14 +19,15 @@ export function SignUpForm() {
     setIsLoading(true);
 
     const body = { username, nickname, password, confirmPassword };
-    axios
-      .post<UserInterface>("/api/v1/user", body)
-      .then(() => navigate("/signin"))
-      .then(() => setUsername(""))
-      .then(() => setNickname(""))
-      .then(() => setPassword(""))
-      .then(() => setConfirmPassword(""))
-      .then(() => navigate("/signin"))
+    authApi
+      .signUp(body)
+      .then(() => {
+        setUsername("");
+        setNickname("");
+        setPassword("");
+        setConfirmPassword("");
+        navigate("/signin");
+      })
       .catch(handleApiError)
       .finally(() => setIsLoading(false));
   };

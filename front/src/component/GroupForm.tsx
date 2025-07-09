@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { GroupInterface } from "../type/Group.interface";
 import { LoaderCircle, X } from "lucide-react";
-import axios from "axios";
+import { groupApi } from "../services/groupApi";
 import { LoadingButton } from "./LoadingButton";
 import { handleApiError } from "../util/handleApiError";
 
@@ -20,9 +20,9 @@ export default function GroupForm({ onSubmit, onClose }: GroupFormProps) {
 
     setIsLoading(true);
 
-    axios
-      .post<GroupInterface>("/api/v1/group", { name, description })
-      .then((response) => onSubmit(response.data))
+    groupApi
+      .createGroup({ name, description })
+      .then((response) => onSubmit(response))
       .then(() => onClose())
       .then(() => setName(""))
       .then(() => setDescription(""))

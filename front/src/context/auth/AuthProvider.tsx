@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import axios from "axios";
+import { authApi } from "../../services/authApi";
+
 import type { UserInterface } from "../../type/User.interface";
 import { LoaderCircle } from "lucide-react";
 
@@ -15,15 +16,13 @@ export function AuthProvider({
   const handleSignIn = (user: UserInterface) => setUser(user);
 
   const handleLogOut = () => {
-    axios
-      .delete("/api/v1/user/token")
-      .then((res) => res.status === 204 && setUser(undefined));
+    authApi.signOut().then((res) => res.status === 204 && setUser(undefined));
   };
 
   useEffect(() => {
-    axios
-      .get<UserInterface>("/api/v1/user/me")
-      .then((res) => setUser(res.data))
+    authApi
+      .getMe()
+      .then((res) => setUser(res))
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);

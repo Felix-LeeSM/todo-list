@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import type { GroupInterface } from "../type/Group.interface";
 import { LoaderCircle, Plus } from "lucide-react";
 import GroupForm from "./GroupForm";
-import axios from "axios";
+import { groupApi } from "../services/groupApi";
+
 import { GroupCard } from "./GroupCard";
 import { useNavigate } from "react-router-dom";
 import { handleApiError } from "../util/handleApiError";
@@ -16,9 +17,9 @@ export default function GroupList() {
 
   useEffect(() => {
     setIsLoading(true);
-    axios
-      .get<GroupInterface[]>("/api/v1/group")
-      .then((response) => setGroups(response.data))
+    groupApi
+      .getGroups()
+      .then((response) => setGroups(response))
       .catch(handleApiError)
       .finally(() => setIsLoading(false));
   }, []);
@@ -27,11 +28,11 @@ export default function GroupList() {
     navigate(`/group/${group.id}`);
 
   const addGroup = (group: GroupInterface) =>
-    setGroups((groups) => [group, ...groups]);
+    setGroups((groups) => [...groups, group]);
 
   const onDeleteGroup = (group: GroupInterface) =>
-    axios
-      .delete(`/api/v1/group/${group.id}`)
+    groupApi
+      .deleteGroup(group.id)
       .then(() =>
         setGroups((groups) => groups.filter((g) => g.id !== group.id))
       )

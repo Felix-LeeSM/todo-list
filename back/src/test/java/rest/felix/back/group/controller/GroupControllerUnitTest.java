@@ -23,6 +23,7 @@ import rest.felix.back.group.entity.enumerated.GroupRole;
 import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.common.exception.throwable.forbidden.UserAccessDeniedException;
 import rest.felix.back.common.exception.throwable.unauthorized.NoMatchingUserException;
+import rest.felix.back.common.util.Pair;
 
 @SpringBootTest
 @Transactional
@@ -427,6 +428,7 @@ public class GroupControllerUnitTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -498,10 +500,11 @@ public class GroupControllerUnitTest {
 
     em.flush();
 
-    Stream.of(
-        GroupRole.MANAGER,
-        GroupRole.VIEWER,
-        GroupRole.MEMBER).forEach(role -> {
+    ;
+    Stream.of(Pair.of(GroupRole.MANAGER, 1), Pair.of(GroupRole.VIEWER, 2), Pair.of(GroupRole.MEMBER, 3))
+        .forEach(pair -> {
+          GroupRole role = pair.first();
+          Integer idx = pair.second();
 
           User user = new User();
           user.setUsername("username" + role);
@@ -519,6 +522,7 @@ public class GroupControllerUnitTest {
           todo.setTitle("todo title");
           todo.setDescription("todo description");
           todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+          todo.setOrder(String.format("todo order %d", idx));
           todo.setAuthor(user);
           todo.setGroup(group);
 

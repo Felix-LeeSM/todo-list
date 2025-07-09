@@ -54,6 +54,8 @@ class TodoServiceTest {
       todo.setAuthor(user);
       todo.setTitle(String.format("todo %d", idx));
       todo.setDescription(String.format("todo %d description", idx));
+      todo.setOrder(String.format("todo order %d", idx));
+
       em.persist(todo);
     });
 
@@ -102,7 +104,9 @@ class TodoServiceTest {
     Assertions.assertTrue(todoDTOs
         .stream()
         .map(TodoDTO::getOrder)
-        .allMatch(order -> order.equals("a")));
+        .toList()
+        .containsAll(
+            List.of("todo order 1", "todo order 2", "todo order 3")));
 
   }
 
@@ -183,7 +187,7 @@ class TodoServiceTest {
 
     em.flush();
 
-    CreateTodoDTO createTodoDTO = new CreateTodoDTO("todo title", "todo description", user.getId(),
+    CreateTodoDTO createTodoDTO = new CreateTodoDTO("todo title", "todo description", "todo order", user.getId(),
         group.getId());
 
     // When
@@ -197,7 +201,7 @@ class TodoServiceTest {
     Assertions.assertEquals(TodoStatus.TO_DO, todoDTO.getStatus());
     Assertions.assertEquals(user.getId(), todoDTO.getAuthorId());
     Assertions.assertEquals(group.getId(), todoDTO.getGroupId());
-    Assertions.assertEquals("a", todoDTO.getOrder());
+    Assertions.assertEquals("todo order", todoDTO.getOrder());
 
   }
 
@@ -224,7 +228,7 @@ class TodoServiceTest {
 
     em.flush();
 
-    CreateTodoDTO createTodoDTO = new CreateTodoDTO("todo title", "todo description", user.getId(),
+    CreateTodoDTO createTodoDTO = new CreateTodoDTO("todo title", "todo description", "todo order", user.getId(),
         group.getId());
 
     // When
@@ -260,7 +264,53 @@ class TodoServiceTest {
 
     em.flush();
 
-    CreateTodoDTO createTodoDTO = new CreateTodoDTO("todo title", "todo description", user.getId(),
+    CreateTodoDTO createTodoDTO = new CreateTodoDTO("todo title", "todo description", "todo order", user.getId(),
+        group.getId());
+
+    // When
+
+    Runnable lambda = () -> todoService.createTodo(createTodoDTO);
+
+    // Then
+
+    Assertions.assertThrows(DataIntegrityViolationException.class, lambda::run);
+
+  }
+
+  @Test
+  void createTodo_Failure_DuplicatedOrder_In_Group() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+
+    em.persist(group);
+
+    Todo todo = new Todo();
+    todo.setAuthor(user);
+    todo.setGroup(group);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setOrder("todo order");
+    todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+
+    em.persist(todo);
+
+    em.flush();
+
+    CreateTodoDTO createTodoDTO = new CreateTodoDTO(
+        "new todo title",
+        "new todo description",
+        "todo order",
+        user.getId(),
         group.getId());
 
     // When
@@ -302,6 +352,7 @@ class TodoServiceTest {
           Todo todo = new Todo();
           todo.setTitle(String.format("todo %d", idx));
           todo.setDescription(String.format("todo %d description", idx));
+          todo.setOrder(String.format("todo %d order", idx));
           todo.setTodoStatus(todoStatus);
           todo.setAuthor(user);
           todo.setGroup(group);
@@ -354,6 +405,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
     em.persist(todo);
@@ -393,6 +445,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
     em.persist(todo);
@@ -438,6 +491,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group1);
     em.persist(todo);
@@ -474,6 +528,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
     em.persist(todo);
@@ -523,6 +578,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -564,6 +620,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -575,7 +632,7 @@ class TodoServiceTest {
         todo.getId(),
         "todo updated title",
         "todo updated description",
-        "someOrder",
+        "todo updated order",
         TodoStatus.DONE);
 
     // When
@@ -591,7 +648,7 @@ class TodoServiceTest {
     System.out.println(todoDTO.getTitle());
     Assertions.assertEquals("todo updated title", todoDTO.getTitle());
     Assertions.assertEquals("todo updated description", todoDTO.getDescription());
-    Assertions.assertEquals("someOrder", todoDTO.getOrder());
+    Assertions.assertEquals("todo updated order", todoDTO.getOrder());
     Assertions.assertEquals(TodoStatus.DONE, todoDTO.getStatus());
 
     Todo updatedTodo = em.createQuery("""
@@ -607,7 +664,7 @@ class TodoServiceTest {
 
     Assertions.assertEquals("todo updated title", updatedTodo.getTitle());
     Assertions.assertEquals("todo updated description", updatedTodo.getDescription());
-    Assertions.assertEquals("someOrder", updatedTodo.getOrder());
+    Assertions.assertEquals("todo updated order", updatedTodo.getOrder());
     Assertions.assertEquals(TodoStatus.DONE, updatedTodo.getTodoStatus());
 
   }
@@ -633,6 +690,7 @@ class TodoServiceTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -661,4 +719,58 @@ class TodoServiceTest {
 
   }
 
+  @Test
+  void updateTodo_Failure_DuplicatedOrder_In_Group() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+
+    em.persist(group);
+
+    Todo todo1 = new Todo();
+    todo1.setTitle("todo1 title");
+    todo1.setDescription("todo1 description");
+    todo1.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo1.setOrder("todo1 order");
+    todo1.setAuthor(user);
+    todo1.setGroup(group);
+
+    Todo todo2 = new Todo();
+    todo2.setTitle("todo2 title");
+    todo2.setDescription("todo2 description");
+    todo2.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo2.setOrder("todo2 order");
+    todo2.setAuthor(user);
+    todo2.setGroup(group);
+
+    em.persist(todo1);
+    em.persist(todo2);
+
+    em.flush();
+
+    UpdateTodoDTO updateTodoDTO = new UpdateTodoDTO(
+        todo2.getId(),
+        "updated todo title",
+        "updated todo description",
+        "todo1 order",
+        TodoStatus.DONE);
+
+    // When
+
+    Runnable lambda = () -> todoService.updateTodo(updateTodoDTO);
+
+    // Then
+
+    Assertions.assertThrows(DataIntegrityViolationException.class, lambda::run);
+
+  }
 }

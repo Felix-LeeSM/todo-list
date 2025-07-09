@@ -63,7 +63,6 @@ public class GlobalExceptionHandler {
         .body(new ErrorResponseDTO("Bad Request, please check parameters."));
   }
 
-
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponseDTO> handleException(
       Exception exception) {

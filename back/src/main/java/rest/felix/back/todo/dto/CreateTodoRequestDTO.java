@@ -10,12 +10,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreateTodoRequestDTO {
 
-  @NotEmpty
+  @NotNull
   @Size(max = 50)
   private String title;
 
   @NotNull
   @Size(max = 200)
   private String description;
+
+  @NotEmpty
+  private String order;
 
 }

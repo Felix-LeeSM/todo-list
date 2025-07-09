@@ -74,6 +74,7 @@ public class TodoRepository {
     todo.setGroup(group);
     todo.setTitle(createTodoDTO.getTitle());
     todo.setDescription(createTodoDTO.getDescription());
+    todo.setOrder(createTodoDTO.getOrder());
 
     em.persist(todo);
 

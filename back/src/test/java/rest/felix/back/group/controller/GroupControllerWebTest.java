@@ -537,6 +537,7 @@ public class GroupControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 

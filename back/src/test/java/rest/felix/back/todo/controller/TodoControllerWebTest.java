@@ -1,8 +1,6 @@
 package rest.felix.back.todo.controller;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -16,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
+
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -54,7 +53,7 @@ public class TodoControllerWebTest {
   private JwtTokenProvider jwtTokenProvider;
 
   private Cookie userCookie(String username) {
-    return new Cookie("accessToken", jwtTokenProvider.generateToken("username123"));
+    return new Cookie("accessToken", jwtTokenProvider.generateToken(username));
   }
 
   @Test
@@ -362,7 +361,7 @@ public class TodoControllerWebTest {
     Cookie cookie = userCookie(user.getUsername());
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -386,7 +385,7 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$.title", equalTo("todo title")));
     result.andExpect(jsonPath("$.description", equalTo("todo description")));
     result.andExpect(jsonPath("$.status", equalTo("TO_DO")));
-    result.andExpect(jsonPath("$.order", equalTo("a")));
+    result.andExpect(jsonPath("$.order", equalTo("todo order")));
 
   }
 
@@ -418,7 +417,7 @@ public class TodoControllerWebTest {
     em.flush();
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -471,7 +470,7 @@ public class TodoControllerWebTest {
     Cookie cookie = userCookie(user.getUsername());
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -527,7 +526,7 @@ public class TodoControllerWebTest {
     Cookie cookie = userCookie(user.getUsername());
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -582,7 +581,7 @@ public class TodoControllerWebTest {
     Cookie cookie = userCookie(user.getUsername());
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -638,7 +637,7 @@ public class TodoControllerWebTest {
     Cookie cookie = userCookie(user.getUsername());
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -658,6 +657,67 @@ public class TodoControllerWebTest {
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
 
+  }
+
+  @Test
+  void createTodo_Failure_Failure_DuplicatedOrder_In_Group() throws Exception {
+
+    // Given
+
+    User user = new User();
+    user.setUsername("username123");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setAuthor(user);
+    todo.setGroup(group);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setTodoStatus(TodoStatus.ON_HOLD);
+    todo.setOrder("todo order");
+
+    em.persist(todo);
+
+    em.flush();
+
+    Cookie cookie = userCookie(user.getUsername());
+
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description", "todo order");
+
+    String body = objectMapper.writeValueAsString(createTodoRequestDTO);
+
+    String path = String.format("/api/v1/group/%d/todo", group.getId());
+
+    // When
+
+    ResultActions result = mvc.perform(
+        post(path)
+            .cookie(cookie)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body));
+
+    // Then
+
+    result.andExpect(status().isBadRequest());
+    result.andExpect(jsonPath("$.message", equalTo("Bad Request, please try again later.")));
   }
 
   @Test
@@ -688,6 +748,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -755,6 +816,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -814,6 +876,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -871,6 +934,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -942,6 +1006,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(author);
     todo.setGroup(group);
 
@@ -995,6 +1060,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1054,6 +1120,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1111,6 +1178,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1197,6 +1265,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1265,6 +1334,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1331,6 +1401,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1407,6 +1478,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(author);
     todo.setGroup(group);
 
@@ -1469,6 +1541,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1537,6 +1610,7 @@ public class TodoControllerWebTest {
     todo.setTitle("todo title");
     todo.setDescription("todo description");
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1575,4 +1649,75 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
   }
 
+  @Test
+  void updateTodo_Failure_DuplicatedOrder_In_Group() throws Exception {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo1 = new Todo();
+    todo1.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo1.setTitle("todo title");
+    todo1.setDescription("todo description");
+    todo1.setOrder("todo1 order");
+    todo1.setAuthor(user);
+    todo1.setGroup(group);
+
+    Todo todo2 = new Todo();
+    todo2.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo2.setTitle("todo title");
+    todo2.setDescription("todo description");
+    todo2.setOrder("todo2 order");
+    todo2.setAuthor(user);
+    todo2.setGroup(group);
+
+    em.persist(todo1);
+    em.persist(todo2);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.ON_HOLD,
+        "todo1 order");
+
+    Cookie cookie = userCookie(user.getUsername());
+
+    String path = String.format("/api/v1/group/%d/todo/%d", group.getId(), todo2.getId());
+
+    String body = objectMapper.writeValueAsString(updateTodoRequestDTO);
+
+    // When
+
+    ResultActions result = mvc.perform(
+        put(path)
+            .cookie(cookie)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body));
+
+    // Then
+
+    result.andExpect(status().isBadRequest());
+    result.andExpect(jsonPath("$.message", equalTo("Bad Request, please try again later.")));
+  }
 }

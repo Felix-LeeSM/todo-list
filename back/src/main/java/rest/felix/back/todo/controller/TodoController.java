@@ -70,7 +70,7 @@ public class TodoController {
     }
 
     CreateTodoDTO createTodoDTO = new CreateTodoDTO(createTodoRequestDTO.getTitle(),
-        createTodoRequestDTO.getDescription(), userId, groupId);
+        createTodoRequestDTO.getDescription(), createTodoRequestDTO.getOrder(), userId, groupId);
 
     TodoDTO todoDTO = todoService.createTodo(createTodoDTO);
 

@@ -5,10 +5,12 @@ import jakarta.transaction.Transactional;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rest.felix.back.todo.dto.TodoDTO;
@@ -323,7 +325,7 @@ public class TodoControllerUnitTest {
     Principal principal = user::getUsername;
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     // When
 
@@ -341,7 +343,7 @@ public class TodoControllerUnitTest {
     Assertions.assertEquals(TodoStatus.TO_DO, todoResponseDTO.status());
     Assertions.assertEquals(user.getId(), todoResponseDTO.authorId());
     Assertions.assertEquals(group.getId(), todoResponseDTO.groupId());
-    Assertions.assertEquals("a", todoResponseDTO.order());
+    Assertions.assertEquals("todo order", todoResponseDTO.order());
   }
 
   @Test
@@ -373,7 +375,7 @@ public class TodoControllerUnitTest {
     Principal principal = user::getUsername;
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     // When
 
@@ -418,7 +420,7 @@ public class TodoControllerUnitTest {
     Principal principal = user::getUsername;
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     // When
 
@@ -463,7 +465,7 @@ public class TodoControllerUnitTest {
     Principal principal = user::getUsername;
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     // When
 
@@ -507,7 +509,7 @@ public class TodoControllerUnitTest {
     Principal principal = user::getUsername;
 
     CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description");
+        "todo description", "todo order");
 
     // When
 
@@ -517,6 +519,59 @@ public class TodoControllerUnitTest {
     // Then
 
     Assertions.assertThrows(UserAccessDeniedException.class, lambda::run);
+  }
+
+  @Test
+  void createTodo_Failure_Failure_DuplicatedOrder_In_Group() throws Exception {
+
+    // Given
+
+    User user = new User();
+    user.setUsername("username123");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group name");
+    group.setDescription("group description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setGroupRole(GroupRole.OWNER);
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+
+    em.persist(userGroup);
+
+    Todo todo = new Todo();
+    todo.setAuthor(user);
+    todo.setGroup(group);
+    todo.setTitle("todo title");
+    todo.setDescription("todo description");
+    todo.setTodoStatus(TodoStatus.ON_HOLD);
+    todo.setOrder("todo order");
+
+    em.persist(todo);
+
+    em.flush();
+
+    Principal principal = user::getUsername;
+
+    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
+        "todo description", "todo order");
+
+    // When
+
+    Runnable lambda = () -> todoController.createTodo(principal, group.getId(),
+        createTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(DataIntegrityViolationException.class, lambda::run);
+
   }
 
   @Test
@@ -547,6 +602,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -608,6 +664,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -661,6 +718,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -711,6 +769,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -764,6 +823,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(author);
     todo.setGroup(group);
 
@@ -810,6 +870,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -818,8 +879,8 @@ public class TodoControllerUnitTest {
     em.flush();
 
     em.remove(todo);
-    em.remove(group);
     em.remove(userGroup);
+    em.remove(group);
 
     em.flush();
 
@@ -862,6 +923,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -912,6 +974,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -923,8 +986,7 @@ public class TodoControllerUnitTest {
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
     Principal principal = user::getUsername;
 
@@ -944,7 +1006,7 @@ public class TodoControllerUnitTest {
     Assertions.assertEquals("updated todo title", todoDTO.getTitle());
     Assertions.assertEquals("updated todo description", todoDTO.getDescription());
     Assertions.assertEquals(TodoStatus.DONE, todoDTO.getStatus());
-    Assertions.assertEquals("someOrder", todoDTO.getOrder());
+    Assertions.assertEquals("updated todo order", todoDTO.getOrder());
 
     Todo updatedTodo = em
         .createQuery("""
@@ -964,6 +1026,7 @@ public class TodoControllerUnitTest {
     Assertions.assertEquals("updated todo title", updatedTodo.getTitle());
     Assertions.assertEquals("updated todo description", updatedTodo.getDescription());
     Assertions.assertEquals(TodoStatus.DONE, updatedTodo.getTodoStatus());
+    Assertions.assertEquals("updated todo order", updatedTodo.getOrder());
   }
 
   @Test
@@ -994,6 +1057,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1011,8 +1075,7 @@ public class TodoControllerUnitTest {
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
     Principal principal = user::getUsername;
 
@@ -1055,6 +1118,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1070,8 +1134,7 @@ public class TodoControllerUnitTest {
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
     Principal principal = user::getUsername;
 
@@ -1113,6 +1176,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1124,8 +1188,7 @@ public class TodoControllerUnitTest {
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
     Principal principal = user::getUsername;
 
@@ -1174,21 +1237,20 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(author);
     todo.setGroup(group);
 
     em.persist(todo);
 
     em.flush();
-
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
-    Principal principal = user::getUsername;
+    Principal principal = author::getUsername;
 
     // When
 
@@ -1228,6 +1290,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1245,8 +1308,7 @@ public class TodoControllerUnitTest {
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
     Principal principal = user::getUsername;
 
@@ -1288,6 +1350,7 @@ public class TodoControllerUnitTest {
     todo.setTodoStatus(TodoStatus.IN_PROGRESS);
     todo.setTitle("todo title");
     todo.setDescription("todo description");
+    todo.setOrder("todo order");
     todo.setAuthor(user);
     todo.setGroup(group);
 
@@ -1303,8 +1366,7 @@ public class TodoControllerUnitTest {
         "updated todo title",
         "updated todo description",
         TodoStatus.DONE,
-        "someOrder"
-    );
+        "updated todo order");
 
     Principal principal = user::getUsername;
 
@@ -1316,5 +1378,68 @@ public class TodoControllerUnitTest {
     // Then
 
     Assertions.assertThrows(ResourceNotFoundException.class, lambda::run);
+  }
+
+  @Test
+  void updateTodo_Failure_DuplicatedOrder_In_Group() {
+    // Given
+
+    User user = new User();
+    user.setUsername("username");
+    user.setNickname("nickname");
+    user.setHashedPassword("hashedPassword");
+
+    em.persist(user);
+
+    Group group = new Group();
+    group.setName("group");
+    group.setDescription("description");
+
+    em.persist(group);
+
+    UserGroup userGroup = new UserGroup();
+    userGroup.setUser(user);
+    userGroup.setGroup(group);
+    userGroup.setGroupRole(GroupRole.OWNER);
+
+    em.persist(userGroup);
+
+    Todo todo1 = new Todo();
+    todo1.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo1.setTitle("todo title");
+    todo1.setDescription("todo description");
+    todo1.setOrder("todo1 order");
+    todo1.setAuthor(user);
+    todo1.setGroup(group);
+
+    Todo todo2 = new Todo();
+    todo2.setTodoStatus(TodoStatus.IN_PROGRESS);
+    todo2.setTitle("todo title");
+    todo2.setDescription("todo description");
+    todo2.setOrder("todo2 order");
+    todo2.setAuthor(user);
+    todo2.setGroup(group);
+
+    em.persist(todo1);
+    em.persist(todo2);
+
+    em.flush();
+
+    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
+        "updated todo title",
+        "updated todo description",
+        TodoStatus.DONE,
+        "todo1 order");
+
+    Principal principal = user::getUsername;
+
+    // When
+
+    Runnable lambda = () -> todoController.updateTodo(principal, group.getId(), todo2.getId(),
+        updateTodoRequestDTO);
+
+    // Then
+
+    Assertions.assertThrows(DataIntegrityViolationException.class, lambda::run);
   }
 }

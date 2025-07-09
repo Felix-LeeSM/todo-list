@@ -18,11 +18,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.user.entity.User;
 import rest.felix.back.group.entity.Group;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
+@ToString
 @Getter
 @Setter
-@ToString
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "group_id", "order" }))
 public class Todo {
 
   @Id
@@ -53,5 +56,5 @@ public class Todo {
   private ZonedDateTime updatedAt;
 
   @Column(nullable = false)
-  private String order = "a";
+  private String order;
 }

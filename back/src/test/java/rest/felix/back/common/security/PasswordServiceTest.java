@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
 class PasswordServiceTest {
 
-  @Autowired
-  private PasswordService passwordService;
+  @Autowired private PasswordService passwordService;
 
   @Test
   void verifyPassword_HappyPath() {
@@ -28,6 +26,5 @@ class PasswordServiceTest {
 
     Assertions.assertTrue(passwordService.verifyPassword(rawPassword, hashedPassword));
     Assertions.assertFalse(passwordService.verifyPassword("wrongPassword", hashedPassword));
-
   }
 }

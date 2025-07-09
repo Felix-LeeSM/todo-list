@@ -5,5 +5,4 @@ public interface RequestExceptionInterface {
   int getStatusCode();
 
   String getMessage();
-
 }

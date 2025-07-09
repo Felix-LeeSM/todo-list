@@ -4,10 +4,10 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.todo.dto.CreateTodoDTO;
 import rest.felix.back.todo.dto.TodoDTO;
 import rest.felix.back.todo.dto.UpdateTodoDTO;
-import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.todo.repository.TodoRepository;
 
 @Service
@@ -24,7 +24,8 @@ public class TodoService {
 
   public TodoDTO getTodoInGroup(long groupId, long todoId) {
 
-    return todoRepository.getTodoInGroup(groupId, todoId)
+    return todoRepository
+        .getTodoInGroup(groupId, todoId)
         .orElseThrow(ResourceNotFoundException::new);
   }
 

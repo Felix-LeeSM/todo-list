@@ -7,9 +7,9 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+import rest.felix.back.common.exception.throwable.badrequest.UsernameTakenException;
 import rest.felix.back.user.dto.SignupDTO;
 import rest.felix.back.user.entity.User;
-import rest.felix.back.common.exception.throwable.badrequest.UsernameTakenException;
 
 @Repository
 @AllArgsConstructor
@@ -31,15 +31,13 @@ public class UserRepository {
     } catch (DataIntegrityViolationException e) {
 
       throw new UsernameTakenException();
-
     }
-
   }
 
   public Optional<User> getByUsername(String username) {
     try {
-      TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.username = :username",
-          User.class);
+      TypedQuery<User> query =
+          em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class);
       query.setParameter("username", username);
 
       User user = query.getSingleResult();

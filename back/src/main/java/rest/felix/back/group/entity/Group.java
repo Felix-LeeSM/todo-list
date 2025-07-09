@@ -41,15 +41,12 @@ public class Group {
   @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Todo> todos = new ArrayList<>();
 
-  @CreationTimestamp
-  private ZonedDateTime createdAt;
+  @CreationTimestamp private ZonedDateTime createdAt;
 
-  @UpdateTimestamp
-  private ZonedDateTime updatedAt;
+  @UpdateTimestamp private ZonedDateTime updatedAt;
 
   public void addUserGroup(UserGroup userGroup) {
     this.userGroups.add(userGroup);
     userGroup.setGroup(this);
   }
-
 }

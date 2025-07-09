@@ -11,5 +11,4 @@ public class UserDTO {
   private final String nickname;
   private final String username;
   private final String hashedPassword;
-
 }

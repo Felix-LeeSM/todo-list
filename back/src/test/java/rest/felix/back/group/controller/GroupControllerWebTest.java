@@ -24,14 +24,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import rest.felix.back.common.security.JwtTokenProvider;
 import rest.felix.back.group.dto.CreateGroupRequestDTO;
 import rest.felix.back.group.entity.Group;
-import rest.felix.back.todo.entity.Todo;
-import rest.felix.back.user.entity.User;
 import rest.felix.back.group.entity.UserGroup;
 import rest.felix.back.group.entity.enumerated.GroupRole;
+import rest.felix.back.todo.entity.Todo;
 import rest.felix.back.todo.entity.enumerated.TodoStatus;
-import rest.felix.back.common.security.JwtTokenProvider;
+import rest.felix.back.user.entity.User;
 
 @SpringBootTest
 @Transactional
@@ -39,14 +39,10 @@ import rest.felix.back.common.security.JwtTokenProvider;
 @ActiveProfiles("test")
 public class GroupControllerWebTest {
 
-  @Autowired
-  private EntityManager em;
-  @Autowired
-  private MockMvc mvc;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
+  @Autowired private EntityManager em;
+  @Autowired private MockMvc mvc;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JwtTokenProvider jwtTokenProvider;
 
   private Cookie userCookie(String username) {
     return new Cookie("accessToken", jwtTokenProvider.generateToken(username));
@@ -67,18 +63,19 @@ public class GroupControllerWebTest {
 
     String path = "/api/v1/group";
 
-    CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName",
-        "group description");
+    CreateGroupRequestDTO createGroupRequestDTO =
+        new CreateGroupRequestDTO("groupName", "group description");
     String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .content(body)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .content(body)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -86,7 +83,6 @@ public class GroupControllerWebTest {
     result.andExpect(jsonPath("$.id").isNotEmpty());
     result.andExpect(jsonPath("$.name").value("groupName"));
     result.andExpect(jsonPath("$.description").value("group description"));
-
   }
 
   @Test
@@ -106,23 +102,23 @@ public class GroupControllerWebTest {
 
     String path = "/api/v1/group";
 
-    CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName",
-        "description");
+    CreateGroupRequestDTO createGroupRequestDTO =
+        new CreateGroupRequestDTO("groupName", "description");
     String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .content(body)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .content(body)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isUnauthorized());
-
   }
 
   @Test
@@ -132,22 +128,22 @@ public class GroupControllerWebTest {
 
     String path = "/api/v1/group";
 
-    CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName",
-        "group description");
+    CreateGroupRequestDTO createGroupRequestDTO =
+        new CreateGroupRequestDTO("groupName", "group description");
     String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(body)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(body)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
-
   }
 
   @Test
@@ -165,25 +161,24 @@ public class GroupControllerWebTest {
 
     String path = "/api/v1/group";
 
-    for (String[] row : new String[][] { { "groupName", null }, { null, "group description" } }) {
+    for (String[] row : new String[][] {{"groupName", null}, {null, "group description"}}) {
       CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO(row[0], row[1]);
       String body = objectMapper.writeValueAsString(createGroupRequestDTO);
 
       // When
 
-      ResultActions result = mvc.perform(
-          post(path)
-              .cookie(cookie)
-              .content(body)
-              .contentType(MediaType.APPLICATION_JSON)
-              .accept(MediaType.APPLICATION_JSON));
+      ResultActions result =
+          mvc.perform(
+              post(path)
+                  .cookie(cookie)
+                  .content(body)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON));
 
       // Then
 
       result.andExpect(status().isBadRequest());
-
     }
-
   }
 
   @Test
@@ -200,16 +195,16 @@ public class GroupControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    for (int idx : new int[] { 1, 2, 3 }) {
-      CreateGroupRequestDTO createGroupRequestDTO = new CreateGroupRequestDTO("groupName",
-          "group description");
+    for (int idx : new int[] {1, 2, 3}) {
+      CreateGroupRequestDTO createGroupRequestDTO =
+          new CreateGroupRequestDTO("groupName", "group description");
       String body = objectMapper.writeValueAsString(createGroupRequestDTO);
       mvc.perform(
-          post("/api/v1/group")
-              .content(body)
-              .contentType(MediaType.APPLICATION_JSON)
-              .accept(MediaType.APPLICATION_JSON)
-              .cookie(cookie))
+              post("/api/v1/group")
+                  .content(body)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .cookie(cookie))
           .andExpect(status().isCreated());
     }
 
@@ -217,11 +212,12 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -230,7 +226,6 @@ public class GroupControllerWebTest {
     result.andExpect(jsonPath("$[*].id", everyItem(notNullValue())));
     result.andExpect(jsonPath("$[*].name", everyItem(equalTo("groupName"))));
     result.andExpect(jsonPath("$[*].description", everyItem(equalTo("group description"))));
-
   }
 
   @Test
@@ -251,17 +246,17 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isOk());
     result.andExpect(jsonPath("$", hasSize(0)));
-
   }
 
   @Test
@@ -273,15 +268,13 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
-
   }
 
   @Test
@@ -314,11 +307,12 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -326,7 +320,6 @@ public class GroupControllerWebTest {
     result.andExpect(jsonPath("$.id", notNullValue()));
     result.andExpect(jsonPath("$.name", equalTo("group name")));
     result.andExpect(jsonPath("$.description", equalTo("group description")));
-
   }
 
   @Test
@@ -357,15 +350,13 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
-
   }
 
   @Test
@@ -403,17 +394,17 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isUnauthorized());
     result.andExpect(jsonPath("$.message", equalTo("There is no user with given conditions.")));
-
   }
 
   @Test
@@ -451,17 +442,17 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -498,17 +489,17 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -551,58 +542,64 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isNoContent());
 
     Assertions.assertTrue(
-        em.createQuery("""
+        em.createQuery(
+                """
             SELECT
               g
             FROM
               Group g
             WHERE
               g.id = :groupId
-            """, Group.class)
+            """,
+                Group.class)
             .setParameter("groupId", group.getId())
             .getResultStream()
             .findFirst()
             .isEmpty());
 
     Assertions.assertTrue(
-        em.createQuery("""
+        em.createQuery(
+                """
             SELECT
               t
             FROM
               Todo t
             WHERE
               t.group.id = :groupId
-            """, Todo.class)
+            """,
+                Todo.class)
             .setParameter("groupId", group.getId())
             .getResultStream()
             .findFirst()
             .isEmpty());
 
     Assertions.assertTrue(
-        em.createQuery("""
+        em.createQuery(
+                """
             SELECT
               ug
             FROM
               UserGroup ug
             WHERE
               ug.group.id = :groupId
-            """, UserGroup.class)
+            """,
+                UserGroup.class)
             .setParameter("groupId", group.getId())
             .getResultStream()
             .findFirst()
             .isEmpty());
-
   }
 
   @Test
@@ -640,11 +637,12 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -686,17 +684,17 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -731,18 +729,18 @@ public class GroupControllerWebTest {
 
       // When
 
-      ResultActions result = mvc.perform(
-          delete(path)
-              .cookie(cookie)
-              .contentType(MediaType.APPLICATION_JSON)
-              .accept(MediaType.APPLICATION_JSON));
+      ResultActions result =
+          mvc.perform(
+              delete(path)
+                  .cookie(cookie)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON));
 
       // Then
 
       result.andExpect(status().isForbidden());
       result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
     }
-
   }
 
   @Test
@@ -780,16 +778,16 @@ public class GroupControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 }

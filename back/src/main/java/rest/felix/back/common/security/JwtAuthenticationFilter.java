@@ -22,25 +22,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtTokenProvider jwtTokenProvider;
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain)
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
     Optional.ofNullable(request.getCookies())
-        .flatMap(cookies -> Arrays.stream(cookies)
-            .filter(cookie -> "accessToken".equals(cookie.getName()))
-            .findFirst())
+        .flatMap(
+            cookies ->
+                Arrays.stream(cookies)
+                    .filter(cookie -> "accessToken".equals(cookie.getName()))
+                    .findFirst())
         .map(Cookie::getValue)
         .filter(jwtTokenProvider::validateToken)
         .map(jwtTokenProvider::getUsernameFromToken)
-        .ifPresent(username -> SecurityContextHolder
-            .getContext()
-            .setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    new ArrayList<>())));
+        .ifPresent(
+            username ->
+                SecurityContextHolder.getContext()
+                    .setAuthentication(
+                        new UsernamePasswordAuthenticationToken(
+                            username, null, new ArrayList<>())));
 
     filterChain.doFilter(request, response);
   }

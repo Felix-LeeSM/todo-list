@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
+import rest.felix.back.group.entity.Group;
 import rest.felix.back.todo.dto.CreateTodoDTO;
 import rest.felix.back.todo.dto.TodoDTO;
 import rest.felix.back.todo.dto.UpdateTodoDTO;
-import rest.felix.back.group.entity.Group;
 import rest.felix.back.todo.entity.Todo;
 import rest.felix.back.user.entity.User;
-import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
 
 @Repository
 @AllArgsConstructor
@@ -20,7 +20,9 @@ public class TodoRepository {
   private final EntityManager em;
 
   public List<TodoDTO> getTodosInGroup(long groupId) {
-    return em.createQuery("""
+    return em
+        .createQuery(
+            """
         SELECT
             t
         FROM
@@ -33,7 +35,8 @@ public class TodoRepository {
             g.id = :groupId
         ORDER BY
             t.order ASC
-        """, Todo.class)
+        """,
+            Todo.class)
         .setParameter("groupId", groupId)
         .getResultList()
         .stream()
@@ -42,7 +45,9 @@ public class TodoRepository {
   }
 
   public Optional<TodoDTO> getTodoInGroup(long groupId, long todoId) {
-    return em.createQuery("""
+    return em
+        .createQuery(
+            """
         SELECT
             t
         FROM
@@ -54,14 +59,14 @@ public class TodoRepository {
             t.id = :todoId
         ORDER BY
             t.order ASC
-        """, Todo.class)
+        """,
+            Todo.class)
         .setParameter("groupId", groupId)
         .setParameter("todoId", todoId)
         .getResultList()
         .stream()
         .findFirst()
         .map(TodoDTO::of);
-
   }
 
   public TodoDTO createTodo(CreateTodoDTO createTodoDTO) {
@@ -79,48 +84,51 @@ public class TodoRepository {
     em.persist(todo);
 
     return TodoDTO.of(todo);
-
   }
 
   public void deleteTodo(long todoId) {
-    em.createQuery("""
+    em.createQuery(
+            """
         DELETE
         FROM Todo t
         WHERE t.id = :todoId
         """)
         .setParameter("todoId", todoId)
         .executeUpdate();
-
   }
 
   public TodoDTO updateTodo(UpdateTodoDTO updateTodoDTO) {
-    return em.createQuery("""
+    return em
+        .createQuery(
+            """
         SELECT
             t
         FROM
             Todo t
         WHERE
             t.id = :todoId
-        """, Todo.class)
+        """,
+            Todo.class)
         .setParameter("todoId", updateTodoDTO.getId())
         .getResultList()
         .stream()
         .findFirst()
-        .map(todo -> {
-          todo.setTodoStatus(updateTodoDTO.getStatus());
-          todo.setDescription(updateTodoDTO.getDescription());
-          todo.setTitle(updateTodoDTO.getTitle());
-          todo.setOrder(updateTodoDTO.getOrder());
-          em.flush();
-          return todo;
-        })
+        .map(
+            todo -> {
+              todo.setTodoStatus(updateTodoDTO.getStatus());
+              todo.setDescription(updateTodoDTO.getDescription());
+              todo.setTitle(updateTodoDTO.getTitle());
+              todo.setOrder(updateTodoDTO.getOrder());
+              em.flush();
+              return todo;
+            })
         .map(TodoDTO::of)
         .orElseThrow(ResourceNotFoundException::new);
-
   }
 
   public void deleteByGroupId(long groupId) {
-    em.createQuery("""
+    em.createQuery(
+            """
         DELETE
         FROM
           Todo t

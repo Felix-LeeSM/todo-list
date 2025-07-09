@@ -12,5 +12,4 @@ public class NotFoundException extends RuntimeException implements RequestExcept
   public NotFoundException(String message) {
     this.message = message;
   }
-
 }

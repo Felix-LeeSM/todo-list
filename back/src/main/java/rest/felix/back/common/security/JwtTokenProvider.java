@@ -1,6 +1,5 @@
 package rest.felix.back.common.security;
 
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
@@ -12,9 +11,9 @@ public class JwtTokenProvider {
 
   @Value("${jwt.access_token.secret_key}")
   private String secretKey;
+
   @Value("${jwt.access_token.ttl}")
   private long expirationTime;
-
 
   public String generateToken(String username) {
     return Jwts.builder()
@@ -25,11 +24,7 @@ public class JwtTokenProvider {
   }
 
   public String getUsernameFromToken(String token) {
-    return Jwts.parser()
-        .setSigningKey(secretKey)
-        .parseClaimsJws(token)
-        .getBody()
-        .getSubject();
+    return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
   }
 
   public boolean validateToken(String token) {
@@ -40,6 +35,4 @@ public class JwtTokenProvider {
       return false;
     }
   }
-
-
 }

@@ -13,5 +13,4 @@ public class UpdateTodoDTO {
   private final String description;
   private final String order;
   private final TodoStatus status;
-
 }

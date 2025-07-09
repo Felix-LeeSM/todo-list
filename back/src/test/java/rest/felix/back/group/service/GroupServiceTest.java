@@ -9,23 +9,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import rest.felix.back.common.exception.throwable.forbidden.UserAccessDeniedException;
+import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
 import rest.felix.back.group.dto.CreateGroupDTO;
 import rest.felix.back.group.dto.GroupDTO;
 import rest.felix.back.group.entity.Group;
-import rest.felix.back.user.entity.User;
 import rest.felix.back.group.entity.UserGroup;
 import rest.felix.back.group.entity.enumerated.GroupRole;
-import rest.felix.back.common.exception.throwable.forbidden.UserAccessDeniedException;
-import rest.felix.back.common.exception.throwable.notfound.ResourceNotFoundException;
+import rest.felix.back.user.entity.User;
 
 @Transactional
 @SpringBootTest
 class GroupServiceTest {
 
-  @Autowired
-  private EntityManager em;
-  @Autowired
-  private GroupService groupService;
+  @Autowired private EntityManager em;
+  @Autowired private GroupService groupService;
 
   @Test
   void createGroup_HappyPath() {
@@ -38,8 +36,8 @@ class GroupServiceTest {
 
     em.persist(user);
 
-    CreateGroupDTO createGroupDTO = new CreateGroupDTO(user.getId(), "groupName",
-        "group description");
+    CreateGroupDTO createGroupDTO =
+        new CreateGroupDTO(user.getId(), "groupName", "group description");
 
     em.flush();
 
@@ -51,14 +49,13 @@ class GroupServiceTest {
 
     Assertions.assertEquals("groupName", groupDTO.getName());
 
-    Group createdGroup = em
-        .createQuery("SELECT g FROM Group g WHERE g.name = :groupName", Group.class)
-        .setParameter("groupName", "groupName")
-        .getSingleResult();
+    Group createdGroup =
+        em.createQuery("SELECT g FROM Group g WHERE g.name = :groupName", Group.class)
+            .setParameter("groupName", "groupName")
+            .getSingleResult();
 
     Assertions.assertEquals(createdGroup.getId(), groupDTO.getId());
     Assertions.assertEquals("group description", createdGroup.getDescription());
-
   }
 
   @Test
@@ -72,8 +69,8 @@ class GroupServiceTest {
 
     em.persist(user);
 
-    CreateGroupDTO createGroupDTO = new CreateGroupDTO(user.getId(), "groupName",
-        "group description");
+    CreateGroupDTO createGroupDTO =
+        new CreateGroupDTO(user.getId(), "groupName", "group description");
 
     em.remove(user);
     em.flush();
@@ -107,18 +104,20 @@ class GroupServiceTest {
     em.persist(user1);
     em.persist(user2);
 
-    Arrays.stream(new int[] { 1, 2, 3 }).forEach(idx -> {
-      groupService.createGroup(
-          new CreateGroupDTO(
-              user1.getId(),
-              String.format("user1 group%d", idx),
-              String.format("user1 group%d description", idx)));
-      groupService.createGroup(
-          new CreateGroupDTO(
-              user2.getId(),
-              String.format("user2 group%d", idx),
-              String.format("user2 group%d description", idx)));
-    });
+    Arrays.stream(new int[] {1, 2, 3})
+        .forEach(
+            idx -> {
+              groupService.createGroup(
+                  new CreateGroupDTO(
+                      user1.getId(),
+                      String.format("user1 group%d", idx),
+                      String.format("user1 group%d description", idx)));
+              groupService.createGroup(
+                  new CreateGroupDTO(
+                      user2.getId(),
+                      String.format("user2 group%d", idx),
+                      String.format("user2 group%d description", idx)));
+            });
 
     em.flush();
 
@@ -132,32 +131,37 @@ class GroupServiceTest {
     Assertions.assertEquals(3, user1GroupDTOs.size());
     Assertions.assertEquals(3, user2GroupDTOs.size());
 
-    Assertions.assertTrue(user1GroupDTOs.stream()
-        .map(GroupDTO::getName)
-        .toList()
-        .containsAll(
-            List.of("user1 group1", "user1 group2", "user1 group3")));
+    Assertions.assertTrue(
+        user1GroupDTOs.stream()
+            .map(GroupDTO::getName)
+            .toList()
+            .containsAll(List.of("user1 group1", "user1 group2", "user1 group3")));
 
-    Assertions.assertTrue(user1GroupDTOs.stream()
-        .map(GroupDTO::getDescription)
-        .toList()
-        .containsAll(
-            List.of("user1 group1 description", "user1 group2 description",
-                "user1 group3 description")));
+    Assertions.assertTrue(
+        user1GroupDTOs.stream()
+            .map(GroupDTO::getDescription)
+            .toList()
+            .containsAll(
+                List.of(
+                    "user1 group1 description",
+                    "user1 group2 description",
+                    "user1 group3 description")));
 
-    Assertions.assertTrue(user2GroupDTOs.stream()
-        .map(GroupDTO::getName)
-        .toList()
-        .containsAll(
-            List.of("user2 group1", "user2 group2", "user2 group3")));
+    Assertions.assertTrue(
+        user2GroupDTOs.stream()
+            .map(GroupDTO::getName)
+            .toList()
+            .containsAll(List.of("user2 group1", "user2 group2", "user2 group3")));
 
-    Assertions.assertTrue(user2GroupDTOs.stream()
-        .map(GroupDTO::getDescription)
-        .toList()
-        .containsAll(
-            List.of("user2 group1 description", "user2 group2 description",
-                "user2 group3 description")));
-
+    Assertions.assertTrue(
+        user2GroupDTOs.stream()
+            .map(GroupDTO::getDescription)
+            .toList()
+            .containsAll(
+                List.of(
+                    "user2 group1 description",
+                    "user2 group2 description",
+                    "user2 group3 description")));
   }
 
   @Test
@@ -181,7 +185,6 @@ class GroupServiceTest {
     // Then
 
     Assertions.assertEquals(0, userGroupDTOs.size());
-
   }
 
   @Test
@@ -205,7 +208,6 @@ class GroupServiceTest {
     // Then
 
     Assertions.assertEquals(0, userGroupDTOs.size());
-
   }
 
   // GroupRole getUserRoleInGroup(long userId, long groupId)
@@ -228,8 +230,8 @@ class GroupServiceTest {
 
     em.persist(group);
 
-    for (GroupRole groupRole : new GroupRole[] { GroupRole.VIEWER, GroupRole.MEMBER,
-        GroupRole.MANAGER, GroupRole.OWNER }) {
+    for (GroupRole groupRole :
+        new GroupRole[] {GroupRole.VIEWER, GroupRole.MEMBER, GroupRole.MANAGER, GroupRole.OWNER}) {
 
       UserGroup userGroup = new UserGroup();
       userGroup.setGroupRole(groupRole);
@@ -364,7 +366,6 @@ class GroupServiceTest {
     Assertions.assertNotNull(groupDTO.getId());
     Assertions.assertEquals("group name", groupDTO.getName());
     Assertions.assertEquals("group description", groupDTO.getDescription());
-
   }
 
   @Test
@@ -408,21 +409,19 @@ class GroupServiceTest {
     // Then
 
     Assertions.assertTrue(
-        em.createQuery("""
+        em.createQuery(
+                """
             SELECT
               g
             FROM
               Group g
             WHERE
               g.id = :groupId
-            """, Group.class)
+            """,
+                Group.class)
             .setParameter("groupId", group.getId())
             .getResultStream()
             .findFirst()
-            .isEmpty()
-
-    );
-
+            .isEmpty());
   }
-
 }

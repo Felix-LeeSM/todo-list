@@ -4,13 +4,13 @@ import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import rest.felix.back.user.dto.SignupDTO;
-import rest.felix.back.user.dto.UserDTO;
-import rest.felix.back.user.dto.SignupRequestDTO;
-import rest.felix.back.user.entity.User;
 import rest.felix.back.common.exception.throwable.badrequest.ConfirmPasswordMismatchException;
 import rest.felix.back.common.exception.throwable.badrequest.UsernameTakenException;
 import rest.felix.back.common.exception.throwable.unauthorized.NoMatchingUserException;
+import rest.felix.back.user.dto.SignupDTO;
+import rest.felix.back.user.dto.SignupRequestDTO;
+import rest.felix.back.user.dto.UserDTO;
+import rest.felix.back.user.entity.User;
 import rest.felix.back.user.repository.UserRepository;
 
 @Service
@@ -23,8 +23,8 @@ public class UserService {
   public UserDTO signup(SignupDTO signupDTO) {
     User user = userRepository.createUser(signupDTO);
 
-    return new UserDTO(user.getId(), user.getNickname(), user.getUsername(),
-        user.getHashedPassword());
+    return new UserDTO(
+        user.getId(), user.getNickname(), user.getUsername(), user.getHashedPassword());
   }
 
   public void validateSignupRequestDTO(SignupRequestDTO signupRequestDTO)
@@ -37,15 +37,18 @@ public class UserService {
     if (userRepository.getByUsername(signupRequestDTO.getUsername()).isPresent()) {
       throw new UsernameTakenException();
     }
-
   }
 
   public Optional<UserDTO> getByUsername(String username) throws NoMatchingUserException {
 
     return userRepository
         .getByUsername(username)
-        .map(user -> new UserDTO(user.getId(), user.getNickname(), user.getUsername(),
-            user.getHashedPassword()));
+        .map(
+            user ->
+                new UserDTO(
+                    user.getId(),
+                    user.getNickname(),
+                    user.getUsername(),
+                    user.getHashedPassword()));
   }
-
 }

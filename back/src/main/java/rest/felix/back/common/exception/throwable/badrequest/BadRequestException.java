@@ -12,5 +12,4 @@ public class BadRequestException extends RuntimeException implements RequestExce
   public BadRequestException(String message) {
     this.message = message;
   }
-
 }

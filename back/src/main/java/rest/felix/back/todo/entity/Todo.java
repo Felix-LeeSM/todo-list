@@ -15,9 +15,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import rest.felix.back.group.entity.Group;
 import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.user.entity.User;
-import rest.felix.back.group.entity.Group;
 
 @ToString
 @Getter
@@ -30,11 +30,9 @@ public class Todo {
   @Setter(AccessLevel.NONE)
   private Long id;
 
-  @ManyToOne
-  private User author;
+  @ManyToOne private User author;
 
-  @ManyToOne
-  private Group group;
+  @ManyToOne private Group group;
 
   @Column(nullable = false)
   private String title;
@@ -46,11 +44,9 @@ public class Todo {
   @Enumerated(EnumType.STRING)
   private TodoStatus todoStatus = TodoStatus.TO_DO;
 
-  @CreationTimestamp
-  private ZonedDateTime createdAt;
+  @CreationTimestamp private ZonedDateTime createdAt;
 
-  @UpdateTimestamp
-  private ZonedDateTime updatedAt;
+  @UpdateTimestamp private ZonedDateTime updatedAt;
 
   @Column(nullable = false)
   private String order;

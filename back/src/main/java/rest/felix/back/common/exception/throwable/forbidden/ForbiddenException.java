@@ -12,5 +12,4 @@ public class ForbiddenException extends RuntimeException implements RequestExcep
   public ForbiddenException(String message) {
     this.message = message;
   }
-
 }

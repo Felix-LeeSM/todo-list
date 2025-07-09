@@ -29,7 +29,8 @@ public class GroupRepository {
   }
 
   public List<GroupDTO> getGroupsByUserId(long userId) {
-    String query = """
+    String query =
+        """
         SELECT
             g
         FROM
@@ -51,7 +52,8 @@ public class GroupRepository {
 
   public Optional<GroupDTO> getById(long groupId) {
     try {
-      String query = """
+      String query =
+          """
           SELECT
               g
           FROM
@@ -61,19 +63,16 @@ public class GroupRepository {
           """;
 
       return Optional.of(
-          em
-              .createQuery(query, Group.class)
-              .setParameter("groupId", groupId)
-              .getSingleResult())
+              em.createQuery(query, Group.class).setParameter("groupId", groupId).getSingleResult())
           .map(group -> new GroupDTO(group.getId(), group.getName(), group.getDescription()));
     } catch (NoResultException e) {
       return Optional.empty();
     }
-
   }
 
   public void deleteGroupById(long groupId) {
-    em.createQuery("""
+    em.createQuery(
+            """
         DELETE
         FROM
           Group g

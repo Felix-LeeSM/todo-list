@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
-
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -26,16 +25,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import rest.felix.back.todo.dto.CreateTodoRequestDTO;
-import rest.felix.back.todo.dto.UpdateTodoRequestDTO;
-import rest.felix.back.group.entity.Group;
-import rest.felix.back.todo.entity.Todo;
-import rest.felix.back.user.entity.User;
-import rest.felix.back.group.entity.UserGroup;
-import rest.felix.back.group.entity.enumerated.GroupRole;
-import rest.felix.back.todo.entity.enumerated.TodoStatus;
 import rest.felix.back.common.security.JwtTokenProvider;
 import rest.felix.back.common.util.Trio;
+import rest.felix.back.group.entity.Group;
+import rest.felix.back.group.entity.UserGroup;
+import rest.felix.back.group.entity.enumerated.GroupRole;
+import rest.felix.back.todo.dto.CreateTodoRequestDTO;
+import rest.felix.back.todo.dto.UpdateTodoRequestDTO;
+import rest.felix.back.todo.entity.Todo;
+import rest.felix.back.todo.entity.enumerated.TodoStatus;
+import rest.felix.back.user.entity.User;
 
 @SpringBootTest
 @Transactional
@@ -43,14 +42,10 @@ import rest.felix.back.common.util.Trio;
 @ActiveProfiles("test")
 public class TodoControllerWebTest {
 
-  @Autowired
-  EntityManager em;
-  @Autowired
-  private MockMvc mvc;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
+  @Autowired EntityManager em;
+  @Autowired private MockMvc mvc;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JwtTokenProvider jwtTokenProvider;
 
   private Cookie userCookie(String username) {
     return new Cookie("accessToken", jwtTokenProvider.generateToken(username));
@@ -81,26 +76,28 @@ public class TodoControllerWebTest {
 
     em.persist(userGroup);
 
-    List<Trio<TodoStatus, String, Integer>> list = Arrays.asList(
-        new Trio<>(TodoStatus.TO_DO, "c", 1),
-        new Trio<>(TodoStatus.IN_PROGRESS, "a", 2),
-        new Trio<>(TodoStatus.DONE, "b", 3),
-        new Trio<>(TodoStatus.ON_HOLD, "d", 4));
+    List<Trio<TodoStatus, String, Integer>> list =
+        Arrays.asList(
+            new Trio<>(TodoStatus.TO_DO, "c", 1),
+            new Trio<>(TodoStatus.IN_PROGRESS, "a", 2),
+            new Trio<>(TodoStatus.DONE, "b", 3),
+            new Trio<>(TodoStatus.ON_HOLD, "d", 4));
 
-    list.forEach(trio -> {
-      TodoStatus todoStatus = trio.first();
-      String order = trio.second();
-      int idx = trio.third();
+    list.forEach(
+        trio -> {
+          TodoStatus todoStatus = trio.first();
+          String order = trio.second();
+          int idx = trio.third();
 
-      Todo todo = new Todo();
-      todo.setTitle(String.format("todo %d", idx));
-      todo.setDescription(String.format("todo %d description", idx));
-      todo.setTodoStatus(todoStatus);
-      todo.setAuthor(user);
-      todo.setGroup(group);
-      todo.setOrder(order);
-      em.persist(todo);
-    });
+          Todo todo = new Todo();
+          todo.setTitle(String.format("todo %d", idx));
+          todo.setDescription(String.format("todo %d description", idx));
+          todo.setTodoStatus(todoStatus);
+          todo.setAuthor(user);
+          todo.setGroup(group);
+          todo.setOrder(order);
+          em.persist(todo);
+        });
 
     em.flush();
 
@@ -110,11 +107,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -136,7 +134,6 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$[3].description", equalTo("todo 4 description")));
     result.andExpect(jsonPath("$[3].status", equalTo("ON_HOLD")));
     result.andExpect(jsonPath("$[3].order", equalTo("d")));
-
   }
 
   @Test
@@ -172,11 +169,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -221,11 +219,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -270,11 +269,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -318,17 +318,17 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -360,8 +360,8 @@ public class TodoControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -369,12 +369,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -386,7 +387,6 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$.description", equalTo("todo description")));
     result.andExpect(jsonPath("$.status", equalTo("TO_DO")));
     result.andExpect(jsonPath("$.order", equalTo("todo order")));
-
   }
 
   @Test
@@ -416,8 +416,8 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -425,11 +425,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -469,8 +470,8 @@ public class TodoControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -478,18 +479,18 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
     result.andExpect(status().isUnauthorized());
     result.andExpect(jsonPath("$.message", equalTo("There is no user with given conditions.")));
-
   }
 
   @Test
@@ -525,8 +526,8 @@ public class TodoControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -534,18 +535,18 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -580,8 +581,8 @@ public class TodoControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -589,18 +590,18 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -636,8 +637,8 @@ public class TodoControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -645,18 +646,18 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
     result.andExpect(status().isForbidden());
     result.andExpect(jsonPath("$.message", equalTo("No permission to perform this action.")));
-
   }
 
   @Test
@@ -698,8 +699,8 @@ public class TodoControllerWebTest {
 
     Cookie cookie = userCookie(user.getUsername());
 
-    CreateTodoRequestDTO createTodoRequestDTO = new CreateTodoRequestDTO("todo title",
-        "todo description", "todo order");
+    CreateTodoRequestDTO createTodoRequestDTO =
+        new CreateTodoRequestDTO("todo title", "todo description", "todo order");
 
     String body = objectMapper.writeValueAsString(createTodoRequestDTO);
 
@@ -707,12 +708,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -762,30 +764,32 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isNoContent());
 
     Assertions.assertTrue(
-        em.createQuery("""
+        em.createQuery(
+                """
             SELECT
               t
             FROM
               Todo t
             WHERE
               t.id = :todoId
-            """, Todo.class)
+            """,
+                Todo.class)
             .setParameter("todoId", todo.getId())
             .getResultStream()
             .findFirst()
             .isEmpty());
-
   }
 
   @Test
@@ -836,11 +840,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -894,11 +899,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -952,11 +958,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -1020,11 +1027,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -1080,11 +1088,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -1138,11 +1147,12 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            delete(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -1186,11 +1196,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1200,12 +1208,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1218,16 +1227,19 @@ public class TodoControllerWebTest {
     result.andExpect(jsonPath("$.authorId", equalTo(user.getId().intValue())));
     result.andExpect(jsonPath("$.groupId", equalTo(group.getId().intValue())));
 
-    Todo updatedTodo = em.createQuery("""
+    Todo updatedTodo =
+        em.createQuery(
+                """
         SELECT
           t
         FROM
           Todo t
         WHERE
           t.id = :todoId
-        """, Todo.class)
-        .setParameter("todoId", todo.getId())
-        .getSingleResult();
+        """,
+                Todo.class)
+            .setParameter("todoId", todo.getId())
+            .getSingleResult();
 
     Assertions.assertEquals(todo.getId(), updatedTodo.getId());
     Assertions.assertEquals("updated todo title", updatedTodo.getTitle());
@@ -1279,11 +1291,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1293,12 +1303,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1346,11 +1357,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1360,12 +1369,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1409,11 +1419,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1423,12 +1431,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1486,11 +1495,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1500,12 +1507,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1555,11 +1563,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1569,12 +1575,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1622,11 +1629,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "someOrder");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1636,12 +1641,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 
@@ -1694,11 +1700,9 @@ public class TodoControllerWebTest {
 
     em.flush();
 
-    UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
-        "updated todo title",
-        "updated todo description",
-        TodoStatus.ON_HOLD,
-        "todo1 order");
+    UpdateTodoRequestDTO updateTodoRequestDTO =
+        new UpdateTodoRequestDTO(
+            "updated todo title", "updated todo description", TodoStatus.ON_HOLD, "todo1 order");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1708,12 +1712,13 @@ public class TodoControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        put(path)
-            .cookie(cookie)
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(body));
+    ResultActions result =
+        mvc.perform(
+            put(path)
+                .cookie(cookie)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
     // Then
 

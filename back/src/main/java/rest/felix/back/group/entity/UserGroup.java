@@ -25,7 +25,7 @@ import rest.felix.back.user.entity.User;
 @Setter
 @ToString
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "userId", "groupId" }))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "groupId"}))
 public class UserGroup {
 
   @Id
@@ -33,22 +33,15 @@ public class UserGroup {
   @Setter(AccessLevel.NONE)
   private Long id;
 
-  @ManyToOne
-  @JoinColumn
-  private User user;
+  @ManyToOne @JoinColumn private User user;
 
-  @ManyToOne
-  @JoinColumn
-  private Group group;
+  @ManyToOne @JoinColumn private Group group;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private GroupRole groupRole;
 
-  @CreationTimestamp
-  private ZonedDateTime createdAt;
+  @CreationTimestamp private ZonedDateTime createdAt;
 
-  @UpdateTimestamp
-  private ZonedDateTime updatedAt;
-
+  @UpdateTimestamp private ZonedDateTime updatedAt;
 }

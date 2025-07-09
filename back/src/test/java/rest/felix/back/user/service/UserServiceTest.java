@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
-import rest.felix.back.user.dto.SignupDTO;
-import rest.felix.back.user.dto.UserDTO;
-import rest.felix.back.user.dto.SignupRequestDTO;
-import rest.felix.back.user.entity.User;
 import rest.felix.back.common.exception.throwable.badrequest.ConfirmPasswordMismatchException;
 import rest.felix.back.common.exception.throwable.badrequest.UsernameTakenException;
+import rest.felix.back.user.dto.SignupDTO;
+import rest.felix.back.user.dto.SignupRequestDTO;
+import rest.felix.back.user.dto.UserDTO;
+import rest.felix.back.user.entity.User;
 import rest.felix.back.user.repository.UserRepository;
 
 @SpringBootTest
@@ -22,12 +22,9 @@ import rest.felix.back.user.repository.UserRepository;
 @ActiveProfiles("test")
 class UserServiceTest {
 
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private EntityManager em;
+  @Autowired private UserService userService;
+  @Autowired private UserRepository userRepository;
+  @Autowired private EntityManager em;
 
   @Test
   void signup_HappyPath() {
@@ -53,8 +50,8 @@ class UserServiceTest {
     // Given
 
     SignupDTO signupDTO = new SignupDTO("username", "nickname", "hashedPassword");
-    SignupDTO duplicatedUsernameSignupDTO = new SignupDTO("username", "nickname2",
-        "hashedPassword2");
+    SignupDTO duplicatedUsernameSignupDTO =
+        new SignupDTO("username", "nickname2", "hashedPassword2");
 
     // When
 
@@ -63,11 +60,12 @@ class UserServiceTest {
 
     // Then
 
-    Assertions.assertThrows(DataIntegrityViolationException.class, () -> {
-      userService.signup(duplicatedUsernameSignupDTO);
-      em.flush();
-    });
-
+    Assertions.assertThrows(
+        DataIntegrityViolationException.class,
+        () -> {
+          userService.signup(duplicatedUsernameSignupDTO);
+          em.flush();
+        });
   }
 
   @Test
@@ -76,15 +74,15 @@ class UserServiceTest {
 
     // When
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username", "nickname", "password",
-        "password");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO("username", "nickname", "password", "password");
 
     // Then
 
-    Assertions.assertDoesNotThrow(() -> {
-      userService.validateSignupRequestDTO(signupRequestDTO);
-    });
-
+    Assertions.assertDoesNotThrow(
+        () -> {
+          userService.validateSignupRequestDTO(signupRequestDTO);
+        });
   }
 
   @Test
@@ -99,15 +97,16 @@ class UserServiceTest {
 
     // When
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username", "nickname", "password",
-        "password");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO("username", "nickname", "password", "password");
 
     // Then
 
-    Assertions.assertThrows(UsernameTakenException.class, () -> {
-      userService.validateSignupRequestDTO(signupRequestDTO);
-    });
-
+    Assertions.assertThrows(
+        UsernameTakenException.class,
+        () -> {
+          userService.validateSignupRequestDTO(signupRequestDTO);
+        });
   }
 
   @Test
@@ -116,15 +115,16 @@ class UserServiceTest {
 
     // When
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username", "nickname", "password",
-        "passwordMismatch");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO("username", "nickname", "password", "passwordMismatch");
 
     // Then
 
-    Assertions.assertThrows(ConfirmPasswordMismatchException.class, () -> {
-      userService.validateSignupRequestDTO(signupRequestDTO);
-    });
-
+    Assertions.assertThrows(
+        ConfirmPasswordMismatchException.class,
+        () -> {
+          userService.validateSignupRequestDTO(signupRequestDTO);
+        });
   }
 
   @Test
@@ -162,5 +162,4 @@ class UserServiceTest {
 
     Assertions.assertTrue(userDTO.isEmpty());
   }
-
 }

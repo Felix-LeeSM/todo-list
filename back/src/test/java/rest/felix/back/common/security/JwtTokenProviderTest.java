@@ -8,8 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class JwtTokenProviderTest {
 
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
+  @Autowired private JwtTokenProvider jwtTokenProvider;
 
   @Test
   void generateParseValidate() {
@@ -20,15 +19,14 @@ class JwtTokenProviderTest {
 
     // When
 
-    Assertions.assertDoesNotThrow(() -> {
-      jwtTokenProvider.validateToken(token);
-    });
+    Assertions.assertDoesNotThrow(
+        () -> {
+          jwtTokenProvider.validateToken(token);
+        });
 
     // Then
 
     Assertions.assertNotEquals(username, token);
     Assertions.assertEquals(username, jwtTokenProvider.getUsernameFromToken(token));
-
-
   }
 }

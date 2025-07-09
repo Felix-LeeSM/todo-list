@@ -19,10 +19,7 @@ public class UpdateTodoRequestDTO {
   @Size(max = 200)
   private String description;
 
-  @NotNull
-  private TodoStatus status;
+  @NotNull private TodoStatus status;
 
-  @NotNull
-  private String order;
-
+  @NotNull private String order;
 }

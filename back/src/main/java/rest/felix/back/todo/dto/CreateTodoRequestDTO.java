@@ -18,7 +18,5 @@ public class CreateTodoRequestDTO {
   @Size(max = 200)
   private String description;
 
-  @NotEmpty
-  private String order;
-
+  @NotEmpty private String order;
 }

@@ -14,11 +14,9 @@ public class PasswordService {
 
   public String hashPassword(String rawPassword) {
     return this.passwordencoder.encode(rawPassword);
-
   }
 
   public boolean verifyPassword(String rawPassword, String hashedPassword) {
     return this.passwordencoder.matches(rawPassword, hashedPassword);
   }
-
 }

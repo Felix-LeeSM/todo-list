@@ -22,10 +22,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import rest.felix.back.common.security.JwtTokenProvider;
 import rest.felix.back.user.dto.SignInRequestDTO;
 import rest.felix.back.user.dto.SignupRequestDTO;
 import rest.felix.back.user.repository.UserRepository;
-import rest.felix.back.common.security.JwtTokenProvider;
 
 @SpringBootTest
 @Transactional
@@ -33,14 +33,10 @@ import rest.felix.back.common.security.JwtTokenProvider;
 @ActiveProfiles("test")
 public class UserControllerWebTest {
 
-  @Autowired
-  private MockMvc mvc;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
+  @Autowired private MockMvc mvc;
+  @Autowired private UserRepository userRepository;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JwtTokenProvider jwtTokenProvider;
 
   @Test
   void signUp_HappyPath() throws Exception {
@@ -49,23 +45,20 @@ public class UserControllerWebTest {
 
     String path = "/api/v1/user";
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "LongEnoughUsername",
-        "nickname",
-        "LongEnoughPassword",
-        "LongEnoughPassword");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "LongEnoughUsername", "nickname", "LongEnoughPassword", "LongEnoughPassword");
 
     String requestBody = objectMapper.writeValueAsString(signupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-
-    );
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -73,7 +66,6 @@ public class UserControllerWebTest {
     result.andExpect(jsonPath("$.id").isNotEmpty());
     result.andExpect(jsonPath("$.username").value("LongEnoughUsername"));
     result.andExpect(jsonPath("$.nickname").value("nickname"));
-
   }
 
   @Test
@@ -85,12 +77,13 @@ public class UserControllerWebTest {
 
     List<String> requestBodies = new ArrayList<>();
     ObjectMapper objectMapper1 = objectMapper;
-    for (String[] row : new String[][]{
-        {null, "nickname", "LongEnoughPassword", "LongEnoughPassword"},
-        {"LongEnoughUsername", null, "LongEnoughPassword", "LongEnoughPassword"},
-        {"LongEnoughUsername", "nickname", null, "LongEnoughPassword"},
-        {"LongEnoughUsername", "nickname", "LongEnoughPassword", null},
-    }) {
+    for (String[] row :
+        new String[][] {
+          {null, "nickname", "LongEnoughPassword", "LongEnoughPassword"},
+          {"LongEnoughUsername", null, "LongEnoughPassword", "LongEnoughPassword"},
+          {"LongEnoughUsername", "nickname", null, "LongEnoughPassword"},
+          {"LongEnoughUsername", "nickname", "LongEnoughPassword", null},
+        }) {
       SignupRequestDTO signupRequestDTO = new SignupRequestDTO(row[0], row[1], row[2], row[3]);
       String s = objectMapper1.writeValueAsString(signupRequestDTO);
       requestBodies.add(s);
@@ -99,17 +92,17 @@ public class UserControllerWebTest {
     // When
 
     for (String requestBody : requestBodies) {
-      ResultActions result = mvc.perform(
-          post(path)
-              .content(requestBody)
-              .contentType(MediaType.APPLICATION_JSON)
-              .accept(MediaType.APPLICATION_JSON));
+      ResultActions result =
+          mvc.perform(
+              post(path)
+                  .content(requestBody)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON));
 
       // Then
 
       result.andExpect(status().isBadRequest());
     }
-
   }
 
   @Test
@@ -119,28 +112,23 @@ public class UserControllerWebTest {
 
     String path = "/api/v1/user";
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "u",
-        "nickname",
-        "LongEnoughPassword",
-        "LongEnoughPassword");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO("u", "nickname", "LongEnoughPassword", "LongEnoughPassword");
 
     String requestBody = objectMapper.writeValueAsString(signupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-
-    );
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -150,28 +138,23 @@ public class UserControllerWebTest {
 
     String path = "/api/v1/user";
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "LongEnoughUsername",
-        "nickname",
-        "password",
-        "password");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO("LongEnoughUsername", "nickname", "password", "password");
 
     String requestBody = objectMapper.writeValueAsString(signupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-
-    );
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isBadRequest());
-
   }
 
   @Test
@@ -181,29 +164,25 @@ public class UserControllerWebTest {
 
     String path = "/api/v1/user";
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "LongEnoughUsername",
-        "nickname",
-        "LongEnoughPassword1",
-        "LongEnoughPassword2");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "LongEnoughUsername", "nickname", "LongEnoughPassword1", "LongEnoughPassword2");
 
     String requestBody = objectMapper.writeValueAsString(signupRequestDTO);
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-
-    );
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isBadRequest());
     result.andExpect(jsonPath("$.message").value("password and confirm Password do not match."));
-
   }
 
   @Test
@@ -213,11 +192,9 @@ public class UserControllerWebTest {
 
     String path = "/api/v1/user";
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO(
-        "LongEnoughUsername",
-        "nickname",
-        "LongEnoughPassword",
-        "LongEnoughPassword");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "LongEnoughUsername", "nickname", "LongEnoughPassword", "LongEnoughPassword");
 
     String requestBody = objectMapper.writeValueAsString(signupRequestDTO);
 
@@ -227,17 +204,14 @@ public class UserControllerWebTest {
         post(path)
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON));
 
-    );
-
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-
-    );
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -249,8 +223,9 @@ public class UserControllerWebTest {
   void createAccessToken_HappyPath() throws Exception {
     // Given
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username123", "nickname",
-        "password123412341234", "password123412341234");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "username123", "nickname", "password123412341234", "password123412341234");
 
     mvc.perform(
         post("/api/v1/user")
@@ -265,11 +240,12 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -281,11 +257,11 @@ public class UserControllerWebTest {
 
     Assertions.assertNotNull(accessTokenCookie);
     String token = accessTokenCookie.getValue();
-    Assertions.assertDoesNotThrow(() -> {
-      jwtTokenProvider.validateToken(token);
-    });
+    Assertions.assertDoesNotThrow(
+        () -> {
+          jwtTokenProvider.validateToken(token);
+        });
     Assertions.assertEquals("username123", jwtTokenProvider.getUsernameFromToken(token));
-
   }
 
   @Test
@@ -299,11 +275,12 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -315,8 +292,9 @@ public class UserControllerWebTest {
   void createAccessToken_Failure_WrongPassword() throws Exception {
     // Given
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username123", "nickname",
-        "password123412341234", "password123412341234");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "username123", "nickname", "password123412341234", "password123412341234");
 
     mvc.perform(
         post("/api/v1/user")
@@ -331,11 +309,12 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        post(path)
-            .content(requestBody)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            post(path)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
     // Then
 
@@ -347,8 +326,9 @@ public class UserControllerWebTest {
   void logOutUser_HappyPath() throws Exception {
     // Given
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username123", "nickname",
-        "password123412341234", "password123412341234");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "username123", "nickname", "password123412341234", "password123412341234");
 
     mvc.perform(
         post("/api/v1/user")
@@ -361,18 +341,17 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path)
-            .cookie(cookie));
+    ResultActions result = mvc.perform(delete(path).cookie(cookie));
 
     // Then
 
     result.andExpect(cookie().exists("accessToken"));
-    result.andExpect(mvcResult -> {
-      Cookie accessTokenCookie = mvcResult.getResponse().getCookie("accessToken");
-      Assertions.assertNotNull(accessTokenCookie);
-      Assertions.assertEquals(0, accessTokenCookie.getMaxAge());
-    });
+    result.andExpect(
+        mvcResult -> {
+          Cookie accessTokenCookie = mvcResult.getResponse().getCookie("accessToken");
+          Assertions.assertNotNull(accessTokenCookie);
+          Assertions.assertEquals(0, accessTokenCookie.getMaxAge());
+        });
   }
 
   @Test
@@ -383,21 +362,20 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        delete(path));
+    ResultActions result = mvc.perform(delete(path));
 
     // Then
 
     result.andExpect(status().isForbidden());
-
   }
 
   @Test
   void currentUserInfo_HappyPath() throws Exception {
     // Given
 
-    SignupRequestDTO signupRequestDTO = new SignupRequestDTO("username123", "nickname",
-        "password123412341234", "password123412341234");
+    SignupRequestDTO signupRequestDTO =
+        new SignupRequestDTO(
+            "username123", "nickname", "password123412341234", "password123412341234");
 
     mvc.perform(
         post("/api/v1/user")
@@ -411,11 +389,12 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .cookie(cookie));
+    ResultActions result =
+        mvc.perform(
+            get(path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie(cookie));
 
     // Then
 
@@ -423,7 +402,6 @@ public class UserControllerWebTest {
     result.andExpect(jsonPath("$.id").isNotEmpty());
     result.andExpect(jsonPath("$.username").value("username123"));
     result.andExpect(jsonPath("$.nickname").value("nickname"));
-
   }
 
   @Test
@@ -434,15 +412,12 @@ public class UserControllerWebTest {
 
     // When
 
-    ResultActions result = mvc.perform(
-        get(path)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+    ResultActions result =
+        mvc.perform(
+            get(path).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON));
 
     // Then
 
     result.andExpect(status().isUnauthorized());
-
   }
-
 }

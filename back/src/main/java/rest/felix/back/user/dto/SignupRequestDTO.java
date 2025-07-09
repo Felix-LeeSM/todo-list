@@ -24,5 +24,4 @@ public class SignupRequestDTO {
   @NotNull
   @Size(min = 10, max = 100)
   private String confirmPassword;
-
 }

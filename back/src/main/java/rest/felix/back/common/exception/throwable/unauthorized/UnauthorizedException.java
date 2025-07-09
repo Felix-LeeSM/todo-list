@@ -12,5 +12,4 @@ public class UnauthorizedException extends RuntimeException implements RequestEx
   public UnauthorizedException(String message) {
     this.message = message;
   }
-
 }

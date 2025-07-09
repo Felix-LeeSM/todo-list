@@ -7,9 +7,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import rest.felix.back.group.dto.UserGroupDTO;
 import rest.felix.back.group.entity.Group;
-import rest.felix.back.user.entity.User;
 import rest.felix.back.group.entity.UserGroup;
 import rest.felix.back.group.entity.enumerated.GroupRole;
+import rest.felix.back.user.entity.User;
 
 @Repository
 @AllArgsConstructor
@@ -20,7 +20,8 @@ public class UserGroupRepository {
   public Optional<UserGroupDTO> getByUserIdAndGroupId(long userId, long groupId) {
     try {
       return Optional.of(
-          em.createQuery("""
+              em.createQuery(
+                      """
               SELECT
                   ug
               FROM
@@ -28,16 +29,16 @@ public class UserGroupRepository {
               WHERE
                   ug.user.id = :userId AND
                   ug.group.id = :groupId
-              """, UserGroup.class)
-              .setParameter("userId", userId)
-              .setParameter("groupId", groupId)
-              .getSingleResult())
+              """,
+                      UserGroup.class)
+                  .setParameter("userId", userId)
+                  .setParameter("groupId", groupId)
+                  .getSingleResult())
           .map(userGroup -> new UserGroupDTO(userGroup.getGroupRole(), userId, groupId));
 
     } catch (NoResultException e) {
       return Optional.empty();
     }
-
   }
 
   public void registerUserToGroup(long userId, long groupId, GroupRole role) {
@@ -50,11 +51,11 @@ public class UserGroupRepository {
     userGroup.setGroupRole(role);
 
     em.persist(userGroup);
-
   }
 
   public void deleteByGroupId(long groupId) {
-    em.createQuery("""
+    em.createQuery(
+            """
         DELETE
         FROM
           UserGroup ug

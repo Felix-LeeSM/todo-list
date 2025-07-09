@@ -569,6 +569,7 @@ class TodoServiceTest {
         todo.getId(),
         "todo updated title",
         "todo updated description",
+        "someOrder",
         TodoStatus.DONE);
 
     // When
@@ -578,8 +579,13 @@ class TodoServiceTest {
     // Then
 
     Assertions.assertEquals(todo.getId(), todoDTO.getId());
+    System.out.println(todoDTO.getTitle());
+    System.out.println(todoDTO.getTitle());
+    System.out.println(todoDTO.getTitle());
+    System.out.println(todoDTO.getTitle());
     Assertions.assertEquals("todo updated title", todoDTO.getTitle());
     Assertions.assertEquals("todo updated description", todoDTO.getDescription());
+    Assertions.assertEquals("someOrder", todoDTO.getOrder());
     Assertions.assertEquals(TodoStatus.DONE, todoDTO.getStatus());
 
     Todo updatedTodo = em.createQuery("""
@@ -595,6 +601,7 @@ class TodoServiceTest {
 
     Assertions.assertEquals("todo updated title", updatedTodo.getTitle());
     Assertions.assertEquals("todo updated description", updatedTodo.getDescription());
+    Assertions.assertEquals("someOrder", updatedTodo.getOrder());
     Assertions.assertEquals(TodoStatus.DONE, updatedTodo.getTodoStatus());
 
   }
@@ -633,8 +640,9 @@ class TodoServiceTest {
 
     UpdateTodoDTO updateTodoDTO = new UpdateTodoDTO(
         todo.getId(),
-        "todo updated title",
-        "todo updated description",
+        "updated todo title",
+        "updated todo description",
+        "someOrder",
         TodoStatus.DONE);
 
     // When

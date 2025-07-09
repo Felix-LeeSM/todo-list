@@ -51,4 +51,7 @@ public class Todo {
 
   @UpdateTimestamp
   private ZonedDateTime updatedAt;
+
+  @Column(nullable = false)
+  private String order = "a";
 }

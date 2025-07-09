@@ -31,12 +31,13 @@ public class TodoRepository {
             t.author
         WHERE
             g.id = :groupId
+        ORDER BY
+            t.order ASC
         """, Todo.class)
         .setParameter("groupId", groupId)
         .getResultList()
         .stream()
-        .map(todo -> new TodoDTO(todo.getId(), todo.getTitle(), todo.getDescription(),
-            todo.getTodoStatus(), todo.getAuthor().getId(), groupId))
+        .map(TodoDTO::of)
         .toList();
   }
 
@@ -51,37 +52,33 @@ public class TodoRepository {
         WHERE
             g.id = :groupId AND
             t.id = :todoId
+        ORDER BY
+            t.order ASC
         """, Todo.class)
         .setParameter("groupId", groupId)
         .setParameter("todoId", todoId)
         .getResultList()
         .stream()
         .findFirst()
-        .map(todo -> new TodoDTO(todo.getId(), todo.getTitle(), todo.getDescription(),
-            todo.getTodoStatus(), todo.getAuthor().getId(), groupId));
+        .map(TodoDTO::of);
 
   }
 
   public TodoDTO createTodo(CreateTodoDTO createTodoDTO) {
-    try {
-      Todo todo = new Todo();
+    Todo todo = new Todo();
 
-      User author = em.getReference(User.class, createTodoDTO.getAuthorId());
-      Group group = em.getReference(Group.class, createTodoDTO.getGroupId());
+    User author = em.getReference(User.class, createTodoDTO.getAuthorId());
+    Group group = em.getReference(Group.class, createTodoDTO.getGroupId());
 
-      todo.setAuthor(author);
-      todo.setGroup(group);
-      todo.setTitle(createTodoDTO.getTitle());
-      todo.setDescription(createTodoDTO.getDescription());
+    todo.setAuthor(author);
+    todo.setGroup(group);
+    todo.setTitle(createTodoDTO.getTitle());
+    todo.setDescription(createTodoDTO.getDescription());
 
-      em.persist(todo);
+    em.persist(todo);
 
-      return new TodoDTO(todo.getId(), todo.getTitle(), todo.getDescription(), todo.getTodoStatus(),
-          todo.getAuthor().getId(), todo.getGroup().getId());
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      throw e;
-    }
+    return TodoDTO.of(todo);
+
   }
 
   public void deleteTodo(long todoId) {
@@ -112,15 +109,11 @@ public class TodoRepository {
           todo.setTodoStatus(updateTodoDTO.getStatus());
           todo.setDescription(updateTodoDTO.getDescription());
           todo.setTitle(updateTodoDTO.getTitle());
+          todo.setOrder(updateTodoDTO.getOrder());
+          em.flush();
           return todo;
         })
-        .map(todo -> new TodoDTO(
-            todo.getId(),
-            todo.getTitle(),
-            todo.getDescription(),
-            todo.getTodoStatus(),
-            todo.getAuthor().getId(),
-            todo.getGroup().getId()))
+        .map(TodoDTO::of)
         .orElseThrow(ResourceNotFoundException::new);
 
   }

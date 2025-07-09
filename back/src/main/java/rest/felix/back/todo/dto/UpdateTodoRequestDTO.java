@@ -22,4 +22,7 @@ public class UpdateTodoRequestDTO {
   @NotNull
   private TodoStatus status;
 
+  @NotNull
+  private String order;
+
 }

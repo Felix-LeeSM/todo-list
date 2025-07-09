@@ -922,7 +922,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 
@@ -1007,7 +1009,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 
@@ -1064,7 +1068,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 
@@ -1116,7 +1122,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 
@@ -1175,7 +1183,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 
@@ -1233,7 +1243,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 
@@ -1289,7 +1301,9 @@ public class TodoControllerUnitTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.DONE);
+        TodoStatus.DONE,
+        "someOrder"
+    );
 
     Principal principal = user::getUsername;
 

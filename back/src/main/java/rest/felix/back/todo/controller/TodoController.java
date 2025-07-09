@@ -137,6 +137,7 @@ public class TodoController {
         todoId,
         updateTodoRequestDTO.getTitle(),
         updateTodoRequestDTO.getDescription(),
+        updateTodoRequestDTO.getOrder(),
         updateTodoRequestDTO.getStatus());
 
     TodoDTO updatedTodoDTO = todoService.updateTodo(updateTodoDTO);

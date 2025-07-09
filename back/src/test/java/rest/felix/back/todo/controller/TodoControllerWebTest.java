@@ -1112,7 +1112,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1202,7 +1203,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1267,7 +1269,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1328,7 +1331,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1403,7 +1407,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1470,7 +1475,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 
@@ -1535,7 +1541,8 @@ public class TodoControllerWebTest {
     UpdateTodoRequestDTO updateTodoRequestDTO = new UpdateTodoRequestDTO(
         "updated todo title",
         "updated todo description",
-        TodoStatus.ON_HOLD);
+        TodoStatus.ON_HOLD,
+        "someOrder");
 
     Cookie cookie = userCookie(user.getUsername());
 

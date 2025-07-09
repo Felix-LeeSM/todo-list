@@ -11,6 +11,7 @@ public class UpdateTodoDTO {
   private final long id;
   private final String title;
   private final String description;
+  private final String order;
   private final TodoStatus status;
 
 }

@@ -30,7 +30,7 @@ export function useTodos(group: GroupInterface) {
       .getTodos(group.id)
       .then((todos) => dispatch({ type: "SET_TODOS", payload: todos }))
       .catch(console.error);
-  }, [group.id]);
+  }, [group.id, dispatch]);
 
   // Actions
   const addTodo = async (title: string, description: string) => {

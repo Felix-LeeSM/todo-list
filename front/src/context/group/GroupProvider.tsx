@@ -29,7 +29,7 @@ export function GroupProvider({
       .then((res) => setGroup(res))
       .catch(() => setGroup(undefined))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [groupId]);
 
   const contextValue = { group, handleSetGroup };
 

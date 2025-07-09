@@ -25,7 +25,6 @@ import jakarta.persistence.UniqueConstraint;
 @Getter
 @Setter
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "group_id", "order" }))
 public class Todo {
 
   @Id

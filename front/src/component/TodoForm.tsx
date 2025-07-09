@@ -7,30 +7,22 @@ import { LoadingButton } from "./LoadingButton";
 import { handleApiError } from "../util/handleApiError";
 
 export type TodoFormProps = {
-  onSubmit: (todo: TodoInterface) => void;
+  onSubmit: (title: string, description: string) => void;
 };
 
 export default function TodoForm({ onSubmit }: TodoFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { group } = useContext(GroupContext);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     setIsLoading(true);
-
-    axios
-      .post<TodoInterface>(`/api/v1/group/${group!.id}/todo`, {
-        title,
-        description,
-      })
-      .then((res) => onSubmit(res.data))
-      .then(() => setTitle(""))
-      .then(() => setDescription(""))
-      .catch(handleApiError)
-      .finally(() => setIsLoading(false));
+    onSubmit(title, description);
+    setTitle("");
+    setDescription("");
+    setIsLoading(false);
   };
 
   return (

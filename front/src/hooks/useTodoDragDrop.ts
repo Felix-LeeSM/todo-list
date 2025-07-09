@@ -1,5 +1,5 @@
 import { DropResult } from "@hello-pangea/dnd";
-import { generateOrder } from "../util/order";
+import { generateOrderedString } from "../util/order";
 import { handleApiError } from "../util/handleApiError";
 import type { TodoInterface } from "../type/Todo.interface";
 import type { TodoStatus } from "../type/TodoStatus";
@@ -30,9 +30,21 @@ export function useTodoDragDrop({
     const newStatus = destination.droppableId as TodoStatus;
     const statusTodos = todosByStatus[newStatus];
 
-    const prevTodo = statusTodos.at(destination.index - 1);
-    const nextTodo = statusTodos.at(destination.index + 1);
-    const newOrder = generateOrder(prevTodo?.order, nextTodo?.order);
+    const tempStatusTodos = statusTodos.filter(
+      (todo) => todo.id.toString() !== draggableId
+    );
+
+    let prevTodo: TodoInterface | undefined;
+    let nextTodo: TodoInterface | undefined;
+
+    if (destination.index > 0) {
+      prevTodo = tempStatusTodos[destination.index - 1];
+    }
+    if (destination.index < tempStatusTodos.length) {
+      nextTodo = tempStatusTodos[destination.index];
+    }
+
+    const newOrder = generateOrderedString(prevTodo?.order, nextTodo?.order);
 
     try {
       await moveTodo(movedTodo.id, newStatus, newOrder);

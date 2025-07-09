@@ -16,20 +16,12 @@ export default function TodoManager({ group }: TodoManagerProps) {
     useTodos(group);
   const { handleDragEnd } = useTodoDragDrop({ todos, todosByStatus, moveTodo });
 
-  const handleAddTodo = async (newTodo: TodoInterface) => {
-    try {
-      await addTodo(newTodo);
-    } catch (error) {
-      handleApiError(error);
-    }
+  const handleAddTodo = (title: string, description: string) => {
+    addTodo(title, description).catch(handleApiError);
   };
 
-  const handleDeleteTodo = async (todo: TodoInterface) => {
-    try {
-      await deleteTodo(todo);
-    } catch (error) {
-      handleApiError(error);
-    }
+  const handleDeleteTodo = (todo: TodoInterface) => {
+    deleteTodo(todo).catch(handleApiError);
   };
 
   return (

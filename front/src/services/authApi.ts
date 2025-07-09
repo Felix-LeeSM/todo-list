@@ -8,13 +8,13 @@ import type {
 export const authApi = {
   signIn: (data: SignInRequestDTO): Promise<UserInterface> => {
     return axios
-      .post<UserInterface>("/api/v1/auth/sign-in", data)
+      .post<UserInterface>("/api/v1/user/token/access-token", data)
       .then((res) => res.data);
   },
 
   signUp: (data: SignUpRequestDTO): Promise<UserInterface> => {
     return axios
-      .post<UserInterface>("/api/v1/auth/sign-up", data)
+      .post<UserInterface>("/api/v1/user", data)
       .then((res) => res.data);
   },
 

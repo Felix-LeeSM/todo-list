@@ -10,4 +10,7 @@ export interface TodoInterface {
   order: string;
 }
 
-export type CreateTodoRequestDTO = Pick<TodoInterface, "title" | "description">;
+export type CreateTodoRequestDTO = Pick<
+  TodoInterface,
+  "title" | "description" | "order"
+>;

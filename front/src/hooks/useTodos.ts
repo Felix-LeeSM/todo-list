@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useTodoReducer } from "./useTodoReducer";
 import { todoApi } from "../services/todoApi";
-import { generateOrder } from "../util/order";
+import { generateOrderedString } from "../util/order";
 import type { GroupInterface } from "../type/Group.interface";
 import type { TodoInterface } from "../type/Todo.interface";
 import type { TodoStatus } from "../type/TodoStatus";
@@ -33,22 +33,22 @@ export function useTodos(group: GroupInterface) {
   }, [group.id]);
 
   // Actions
-  const addTodo = async (newTodo: TodoInterface) => {
+  const addTodo = async (title: string, description: string) => {
     const lastTodo = todosByStatus.TO_DO[todosByStatus.TO_DO.length - 1];
-    const newOrder = generateOrder(lastTodo?.order);
-    const todoWithOrder = { ...newTodo, order: newOrder };
+    const newOrder = generateOrderedString(lastTodo?.order);
 
-    // Optimistic update
-    dispatch({ type: "ADD_TODO", payload: todoWithOrder });
+    // Optimistic update (optional, but good for UX)
+    // We don't have an ID yet, so we can't add it to the state directly
+    // dispatch({ type: "ADD_TODO", payload: { title, description, order: newOrder } });
 
     try {
-      const updatedTodo = await todoApi.updateTodo(
-        group.id,
-        newTodo.id,
-        todoWithOrder
+      const createdTodo = await todoApi.createTodo(
+        { title, description, order: newOrder },
+        group.id
       );
-      dispatch({ type: "UPDATE_TODO", payload: updatedTodo });
+      dispatch({ type: "ADD_TODO", payload: createdTodo });
     } catch (error) {
+      // If optimistic update was done, revert it here
       dispatch({ type: "REVERT_STATE", payload: state.previousState });
       throw error;
     }

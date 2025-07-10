@@ -31,7 +31,7 @@ services:
     ports:
       - '80:80'
       - '443:443'
-      - '81:81' # Admin UI
+      - '127.0.0.1:81:81' # Admin UI
     environment:
       DB_MYSQL_HOST: proxy_manager_db
       DB_MYSQL_PORT: ${PROXY_MANAGER_DB_PORT}

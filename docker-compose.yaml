@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   back:
     build:
@@ -11,16 +13,51 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ACCESS_TOKEN_TTL_MS=${JWT_ACCESS_TOKEN_TTL_MS}
+    networks:
+      - app-network
 
   front:
     build:
       context: ./front
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
-      - "443:443"
     depends_on:
       - back
+    networks:
+      - app-network
+
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81' # Admin UI
+    environment:
+      DB_MYSQL_HOST: proxy_manager_db
+      DB_MYSQL_PORT: ${PROXY_MANAGER_DB_PORT}
+      DB_MYSQL_USER: ${PROXY_MANAGER_DB_USER}
+      DB_MYSQL_PASSWORD: ${PROXY_MANAGER_DB_PASSWORD} # Change this to a strong password
+      DB_MYSQL_NAME: ${PROXY_MANAGER_DB_DATABASE}
     volumes:
-      - /etc/letsencrypt/live/www.days-archive.shop/fullchain.pem:/etc/letsencrypt/live/www.days-archive.shop/fullchain.pem:ro
-      - /etc/letsencrypt/live/www.days-archive.shop/privkey.pem:/etc/letsencrypt/live/www.days-archive.shop/privkey.pem:ro
+      - ./data/nginx-proxy-manager:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - proxy_manager_db
+    networks:
+      - app-network
+  proxy_manager_db:
+    image: 'mariadb:10.6'
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PROXY_MANAGER_DB_ROOT_PASSWORD} # Change this to a strong password
+      MYSQL_DATABASE: ${PROXY_MANAGER_DB_DATABASE}
+      MYSQL_USER: ${PROXY_MANAGER_DB_USER}
+      MYSQL_PASSWORD: ${PROXY_MANAGER_DB_PASSWORD} # Change this to a strong password
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

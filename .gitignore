@@ -3,7 +3,13 @@
 .vscode/
 
 # 환경 변수
-.envrc.private
+.envrc.*
+.env*
+
+# Docker Volumes
+/data/nginx-proxy-manager/
+/letsencrypt/
+/data/mariadb/
 
 # OS에서 생성되는 불필요한 파일들
 .DS_Store
